@@ -1,0 +1,42 @@
+{
+  "name": "ethos-sim-manager",
+  "displayName": "Ethos Simulator Manager",
+  "description": "Add and manage Ethos simulator firmware from VS Code",
+  "version": "0.1.0",
+  "publisher": "flyingeek",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flyingeek/ethos-sim-manager"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["workspaceContains:simulator"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ethos.addSimulator",
+        "title": "Ethos: Add Simulator"
+      },
+      {
+        "command": "ethos.setSimulator",
+        "title": "Ethos: Set Simulator"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.2.0"
+  }
+}
