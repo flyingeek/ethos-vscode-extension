@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { addSimulator } from './commands/addSimulator';
-import { setFirmware } from './commands/setFirmware';
+import { setFirmware } from './commands/setSimulator';
 import { createStatusBar } from './statusBar';
 
 export function activate(context: vscode.ExtensionContext): void {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as jsoncParser from 'jsonc-parser';
 import { fetchStructuredData } from '../api';
-import { applyFirmware } from './setFirmware';
+import { applyFirmware } from './setSimulator';
 
 const DEFAULT_VERSION = 'nightly26';
 
