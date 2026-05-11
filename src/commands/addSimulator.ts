@@ -2,8 +2,7 @@ import * as vscode from 'vscode';
 import * as jsoncParser from 'jsonc-parser';
 import { fetchStructuredData } from '../api';
 import { applyFirmware } from './setSimulator';
-
-const DEFAULT_VERSION = 'nightly26';
+import { DEFAULT_VERSION } from '../constants';
 
 export async function addSimulator(context: vscode.ExtensionContext): Promise<void> {
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri;

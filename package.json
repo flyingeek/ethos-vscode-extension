@@ -2,7 +2,7 @@
   "name": "ethos-sim-manager",
   "displayName": "Ethos Simulator Manager",
   "description": "Add and manage Ethos simulator firmware from VS Code",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
@@ -23,6 +23,10 @@
       {
         "command": "ethos.setSimulator",
         "title": "Ethos: Set Simulator"
+      },
+      {
+        "command": "ethos.showSimMenu",
+        "title": "Ethos: Show Menu"
       }
     ]
   },

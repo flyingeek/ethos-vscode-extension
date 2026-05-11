@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-
-const DEFAULT_VERSION = 'nightly26';
+import { DEFAULT_VERSION } from '../constants';
 
 export async function setFirmware(): Promise<void> {
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri;
