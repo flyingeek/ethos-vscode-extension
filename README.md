@@ -8,9 +8,15 @@ It adds simulator management commands to VS Code:
 - **Ethos: Set Simulator** — switch the active simulator firmware via a quick pick
 - **Ethos: Show Menu** — show the custom quick pick menu defined in `.vscode/sim-menu.json`
 
-The extension is only activated in workspaces containing a `simulator/` directory.
+The extension is only activated in workspaces where the [bsongis.ethos](https://marketplace.visualstudio.com/items?itemName=bsongis.ethos) extension is active. It requires `bsongis.ethos` to be installed.
 
 Note: the simulator name comes from Rob's vscode-template; `simulators/` or a user-defined name may be more appropriate.
+
+## Configuration
+
+| Setting | Type | Default | Description |
+|---|---|---|---|
+| `ethos.simulatorFolder` | `string` | `"simulator"` | Relative path to the simulator directory within the workspace |
 
 ## Status Bar
 

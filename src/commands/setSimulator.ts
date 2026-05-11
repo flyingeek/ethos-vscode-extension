@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DEFAULT_VERSION } from '../constants';
+import { DEFAULT_VERSION, getSimulatorFolder } from '../constants';
 
 export async function setFirmware(): Promise<void> {
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri;
@@ -8,12 +8,13 @@ export async function setFirmware(): Promise<void> {
     return;
   }
 
-  const simulatorUri = vscode.Uri.joinPath(workspaceRoot, 'simulator');
+  const simulatorFolder = getSimulatorFolder();
+  const simulatorUri = vscode.Uri.joinPath(workspaceRoot, simulatorFolder);
   let entries: [string, vscode.FileType][];
   try {
     entries = await vscode.workspace.fs.readDirectory(simulatorUri);
   } catch {
-    vscode.window.showErrorMessage('Could not read simulator/ directory.');
+    vscode.window.showErrorMessage(`Could not read ${simulatorFolder}/ directory.`);
     return;
   }
 
@@ -67,7 +68,7 @@ export async function applyFirmware(dirName: string): Promise<void> {
   const atIdx = dirName.indexOf('@');
   const firmware = atIdx !== -1 ? dirName.slice(0, atIdx) : dirName;
   const version = atIdx !== -1 ? dirName.slice(atIdx + 1) : DEFAULT_VERSION;
-  const root = `simulator/${dirName}`;
+  const root = `${getSimulatorFolder()}/${dirName}`;
 
   const config = vscode.workspace.getConfiguration();
   await config.update('ethos.firmware', firmware, vscode.ConfigurationTarget.Workspace);

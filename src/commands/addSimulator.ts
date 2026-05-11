@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as jsoncParser from 'jsonc-parser';
 import { fetchStructuredData } from '../api';
 import { applyFirmware } from './setSimulator';
-import { DEFAULT_VERSION } from '../constants';
+import { DEFAULT_VERSION, getSimulatorFolder } from '../constants';
 
 export async function addSimulator(context: vscode.ExtensionContext): Promise<void> {
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri;
@@ -55,7 +55,7 @@ export async function addSimulator(context: vscode.ExtensionContext): Promise<vo
   const firmwareName = `${radio}_${protocol}`;
   const dirName = version === DEFAULT_VERSION ? firmwareName : `${firmwareName}@${version}`;
 
-  const simulatorUri = vscode.Uri.joinPath(workspaceRoot, 'simulator');
+  const simulatorUri = vscode.Uri.joinPath(workspaceRoot, getSimulatorFolder());
   const targetUri = vscode.Uri.joinPath(simulatorUri, dirName);
 
   try {
