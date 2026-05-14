@@ -42,7 +42,7 @@ Each item supports the following fields:
 [
     {
         "label": "$(debug-start)Deploy & Launch SIM",
-        "task": "Deploy [SIM Files] + Launch SIM"
+        "task": "Deploy & Launch [SIM]"
     },
     {
         "label": "▶️ Start SIM",
@@ -51,6 +51,10 @@ Each item supports the following fields:
     {
         "label": "🛑 Stop SIM",
         "task": "ethos.Stop"
+    },
+    {
+        "label": "🆑 Clear Logfile",
+        "command": ["ethos.clearLogfile", "ethos.showSimMenu"]
     },
     { "label": "", "separator": true },
     {
@@ -65,9 +69,13 @@ Each item supports the following fields:
         "label": "🖥️ Open Display",
         "command": "ethos.openDisplay"
     },
+    {
+        "label": "📊 Telemetry playback",
+        "command": "ethos.playTelemetry"
+    },
     { "label": "", "separator": true },
     {
-        "label": "⚙️ Change Simulator Firmware",
+        "label": "⚙️ Change SIM",
         "command": ["ethos.setSimulator", "ethos.showSimMenu"]
     }
 ]

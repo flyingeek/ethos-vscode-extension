@@ -2,7 +2,7 @@
   "name": "ethos-sim-manager",
   "displayName": "Ethos Simulator Manager",
   "description": "Add and manage Ethos simulator firmware from VS Code",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
@@ -24,6 +24,19 @@
           "default": "simulator",
           "description": "Relative path to the simulator directory within the workspace.",
           "scope": "resource"
+        },
+        "ethos.telemetrySpeed": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0.1,
+          "description": "Default telemetry replay speed multiplier (1 = real-time, 2 = double speed).",
+          "scope": "resource"
+        },
+        "ethos.telemetryLoop": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether telemetry playback loops back to the beginning when the file ends.",
+          "scope": "resource"
         }
       }
     },
@@ -39,6 +52,14 @@
       {
         "command": "ethos.showSimMenu",
         "title": "Ethos: Show Menu"
+      },
+      {
+        "command": "ethos.playTelemetry",
+        "title": "Ethos: Play Telemetry CSV"
+      },
+      {
+        "command": "ethos.stopTelemetry",
+        "title": "Ethos: Stop Telemetry"
       }
     ]
   },
