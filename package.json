@@ -37,6 +37,30 @@
           "default": false,
           "description": "Whether telemetry playback loops back to the beginning when the file ends.",
           "scope": "resource"
+        },
+        "ethos.statusBarEnable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show or hide the Ethos status bar item.",
+          "scope": "resource"
+        },
+        "ethos.statusBarText": {
+          "type": "string",
+          "default": "$(radio-tower) ${firmware}@${version}",
+          "description": "Status bar label. Supports ${firmware} and ${version} placeholders.",
+          "scope": "resource"
+        },
+        "ethos.statusBarCommand": {
+          "type": "string",
+          "default": "ethos.showSimMenu",
+          "description": "Command to run when clicking the Ethos status bar item.",
+          "scope": "resource"
+        },
+        "ethos.statusBarTooltip": {
+          "type": "string",
+          "default": "Ethos: Show Menu",
+          "description": "Tooltip shown on the Ethos status bar item.",
+          "scope": "resource"
         }
       }
     },
