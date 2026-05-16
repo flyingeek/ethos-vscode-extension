@@ -58,7 +58,21 @@ const ETHOS_ALIAS: Record<string, string> = {
   'ESC current':   'Current',
   'ESC RPM':       'RPM',
   'ESC Consumption': 'Consumption',
+  'ESC consumption': 'Consumption', // lowercase variant in Ethos logs
   'ESC temp':      'Temperature',
+  'GPS alt':       'Altitude',
+  'GPS speed':     'Speed',
+  'GPS course':    'Course',
+  'GPS Satellites': 'Sats',
+  'VFAS':          'Voltage',
+  'LiPo1':         'Cell 0',
+  'LiPo2':         'Cell 1',
+  'LiPo3':         'Cell 2',
+  'LiPo4':         'Cell 3',
+  'LiPo5':         'Cell 4',
+  'LiPo6':         'Cell 5',
+  'LiPo7':         'Cell 6',
+  'LiPo8':         'Cell 7',
   // RAW ESC consump is a raw wire value, not a human-readable frame
 };
 
