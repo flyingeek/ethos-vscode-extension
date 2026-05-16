@@ -61,16 +61,12 @@ Each item supports the following fields:
 ```json
 [
     {
-        "label": "$(debug-start)Deploy & Launch SIM",
-        "task": "Deploy & Launch [SIM]"
-    },
-    {
         "label": "▶️ Start SIM",
-        "task": "ethos.Start"
+        "command": "ethos.start"
     },
     {
         "label": "🛑 Stop SIM",
-        "task": "ethos.Stop"
+        "command": "ethos.stop"
     },
     {
         "label": "🆑 Clear Logfile",
@@ -102,17 +98,17 @@ Each item supports the following fields:
 ```
 
 > [!NOTE]
-> This extension will work best in a project using [rob's vscode template](https://github.com/FrSkyRC/ETHOS-Feedback-Community/tree/1.6/lua/vscode-project), in a standard project you will need to replace in the example above the start and stop entries by:
+> If your project is using [rob's vscode template](https://github.com/FrSkyRC/ETHOS-Feedback-Community/tree/1.6/lua/vscode-project), you should replace, in the above example, the first entry by:
 
 ```json
 [
     {
-        "label": "▶️ Start SIM",
-        "command": "ethos.start"
+        "label": "$(debug-start)Deploy & Launch SIM",
+        "task": "Deploy & Launch [SIM]"
     },
     {
-        "label": "🛑 Stop SIM",
-        "command": "ethos.stop"
+        "label": "▶️ Start SIM",
+        "task": "ethos.Start"
     },
 ]
 ```
