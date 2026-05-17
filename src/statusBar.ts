@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { DEFAULT_VERSION } from './constants';
 
 export interface StatusBarPin {
   text: string;
@@ -27,7 +28,7 @@ export function createStatusBar(context: vscode.ExtensionContext): void {
 
     const firmware = config.get<string>('ethos.firmware');
     const version = config.get<string>('ethos.version');
-    const template = config.get<string>('ethos.statusBarText', '$(radio-tower) ${firmware}@${version}');
+    const template = config.get<string>('ethos.statusBarText', '$(radio-tower) ${firmware}${versionSuffix}');
     const command = config.get<string>('ethos.statusBarCommand', 'ethos.showSimMenu');
     const tooltip = config.get<string>('ethos.statusBarTooltip', 'Ethos: Show Menu');
 
@@ -37,7 +38,8 @@ export function createStatusBar(context: vscode.ExtensionContext): void {
     if (firmware) {
       item.text = template
         .replace(/\$\{firmware\}/g, firmware)
-        .replace(/\$\{version\}/g, version ?? '');
+        .replace(/\$\{version\}/g, version ?? '')
+        .replace(/\$\{versionSuffix\}/g, version && version !== DEFAULT_VERSION ? '@' + version : '');
     } else {
       item.text = '$(radio-tower) Set firmware';
     }

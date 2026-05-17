@@ -46,8 +46,8 @@
         },
         "ethos.statusBarText": {
           "type": "string",
-          "default": "$(radio-tower) ${firmware}@${version}",
-          "description": "Status bar label. Supports ${firmware} and ${version} placeholders.",
+          "default": "$(radio-tower) ${firmware}${versionSuffix}",
+          "description": "Status bar label. Supports ${firmware}, ${version}, and ${versionSuffix} placeholders. ${versionSuffix} renders @<version> only when version is not nightly26.",
           "scope": "resource"
         },
         "ethos.statusBarCommand": {

@@ -26,6 +26,8 @@ Note: the simulator name comes from Rob's vscode-template; `simulators/` or a us
 
 The status bar item displays the active simulator firmware. Clicking it opens the **Ethos: Show Menu** quick pick (see below). If `.vscode/sim-menu.json` is absent, empty, or invalid, the click falls back to **Ethos: Set Simulator** directly.
 
+`ethos.statusBarText` supports `${firmware}`, `${version}`, and `${versionSuffix}` placeholders. `${versionSuffix}` expands to `@<version>` only when the configured version is not `nightly26`; otherwise it expands to an empty string.
+
 During telemetry playback the item switches to a spinning indicator (`Telemetry playing`). Clicking it while playing triggers **Ethos: Stop Telemetry**.
 
 ## Telemetry Playback
