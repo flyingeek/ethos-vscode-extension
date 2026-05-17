@@ -11,79 +11,97 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
-  "activationEvents": ["onStartupFinished"],
-  "extensionDependencies": ["bsongis.ethos"],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "bsongis.ethos"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
       "title": "Ethos Simulator Manager",
       "properties": {
-        "ethos.simulatorFolder": {
+        "ethosSimManager.simulatorFolder": {
           "type": "string",
           "default": "simulator",
           "description": "Relative path to the simulator directory within the workspace.",
           "scope": "resource"
         },
-        "ethos.telemetrySpeed": {
+        "ethosSimManager.telemetrySpeed": {
           "type": "number",
           "default": 1,
           "minimum": 0.1,
           "description": "Default telemetry replay speed multiplier (1 = real-time, 2 = double speed).",
           "scope": "resource"
         },
-        "ethos.telemetryLoop": {
+        "ethosSimManager.telemetryLoop": {
           "type": "boolean",
           "default": false,
           "description": "Whether telemetry playback loops back to the beginning when the file ends.",
           "scope": "resource"
         },
-        "ethos.statusBarEnable": {
+        "ethosSimManager.statusBarEnable": {
           "type": "boolean",
           "default": true,
           "description": "Show or hide the Ethos status bar item.",
           "scope": "resource"
         },
-        "ethos.statusBarText": {
+        "ethosSimManager.statusBarText": {
           "type": "string",
           "default": "$(radio-tower) ${firmware}${versionSuffix}",
           "description": "Status bar label. Supports ${firmware}, ${version}, and ${versionSuffix} placeholders. ${versionSuffix} renders @<version> only when version is not nightly26.",
           "scope": "resource"
         },
-        "ethos.statusBarCommand": {
+        "ethosSimManager.statusBarCommand": {
           "type": "string",
-          "default": "ethos.showSimMenu",
+          "default": "ethosSimManager.showSimMenu",
           "description": "Command to run when clicking the Ethos status bar item.",
           "scope": "resource"
         },
-        "ethos.statusBarTooltip": {
+        "ethosSimManager.statusBarTooltip": {
           "type": "string",
           "default": "Ethos: Show Menu",
           "description": "Tooltip shown on the Ethos status bar item.",
+          "scope": "resource"
+        },
+        "ethosSimManager.firmware": {
+          "type": "string",
+          "default": "",
+          "description": "Active simulator firmware identifier.",
+          "scope": "resource"
+        },
+        "ethosSimManager.version": {
+          "type": "string",
+          "default": "nightly26",
+          "description": "Active simulator firmware version.",
           "scope": "resource"
         }
       }
     },
     "commands": [
       {
-        "command": "ethos.addSimulator",
-        "title": "Ethos: Add Simulator"
+        "command": "ethosSimManager.addSimulator",
+        "title": "Ethos Sim Manager: Add Simulator"
       },
       {
-        "command": "ethos.setSimulator",
-        "title": "Ethos: Set Simulator"
+        "command": "ethosSimManager.setSimulator",
+        "title": "Ethos Sim Manager: Set Simulator"
       },
       {
-        "command": "ethos.showSimMenu",
-        "title": "Ethos: Show Menu"
+        "command": "ethosSimManager.showSimMenu",
+        "title": "Ethos Sim Manager: Show Menu"
       },
       {
-        "command": "ethos.playTelemetry",
-        "title": "Ethos: Play Telemetry CSV"
+        "command": "ethosSimManager.playTelemetry",
+        "title": "Ethos Sim Manager: Play Telemetry CSV"
       },
       {
-        "command": "ethos.stopTelemetry",
-        "title": "Ethos: Stop Telemetry"
+        "command": "ethosSimManager.stopTelemetry",
+        "title": "Ethos Sim Manager: Stop Telemetry"
       }
     ]
   },
@@ -93,8 +111,8 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
     "@types/node": "18.x",
+    "@types/vscode": "^1.85.0",
     "typescript": "^5.3.0"
   }
 }

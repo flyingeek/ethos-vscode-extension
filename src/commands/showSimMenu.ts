@@ -10,7 +10,7 @@ interface SimMenuItem {
 }
 
 function fallback(): void {
-  vscode.commands.executeCommand('ethos.setSimulator');
+  vscode.commands.executeCommand('ethosSimManager.setSimulator');
 }
 
 export async function showSimMenu(): Promise<void> {
@@ -57,8 +57,8 @@ export async function showSimMenu(): Promise<void> {
   }
 
   const config = vscode.workspace.getConfiguration();
-  const firmware = config.get<string>('ethos.firmware');
-  const version = config.get<string>('ethos.version');
+  const firmware = config.get<string>('ethosSimManager.firmware');
+  const version = config.get<string>('ethosSimManager.version');
   const activeName = firmware ? firmwareLabel(firmware, version) : undefined;
   const placeHolder = activeName ? `Active: ${activeName}` : 'Select action';
 

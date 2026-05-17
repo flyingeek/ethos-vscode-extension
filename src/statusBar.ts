@@ -20,17 +20,17 @@ export function createStatusBar(context: vscode.ExtensionContext): void {
 
     const config = vscode.workspace.getConfiguration();
 
-    const enabled = config.get<boolean>('ethos.statusBarEnable', true);
+    const enabled = config.get<boolean>('ethosSimManager.statusBarEnable', true);
     if (!enabled) {
       item.hide();
       return;
     }
 
-    const firmware = config.get<string>('ethos.firmware');
-    const version = config.get<string>('ethos.version');
-    const template = config.get<string>('ethos.statusBarText', '$(radio-tower) ${firmware}${versionSuffix}');
-    const command = config.get<string>('ethos.statusBarCommand', 'ethos.showSimMenu');
-    const tooltip = config.get<string>('ethos.statusBarTooltip', 'Ethos: Show Menu');
+    const firmware = config.get<string>('ethosSimManager.firmware');
+    const version = config.get<string>('ethosSimManager.version');
+    const template = config.get<string>('ethosSimManager.statusBarText', '$(radio-tower) ${firmware}${versionSuffix}');
+    const command = config.get<string>('ethosSimManager.statusBarCommand', 'ethosSimManager.showSimMenu');
+    const tooltip = config.get<string>('ethosSimManager.statusBarTooltip', 'Ethos: Show Menu');
 
     item.command = command;
     item.tooltip = tooltip;
@@ -52,7 +52,7 @@ export function createStatusBar(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     item,
     vscode.workspace.onDidChangeConfiguration(e => {
-      if (e.affectsConfiguration('ethos')) {
+      if (e.affectsConfiguration('ethosSimManager')) {
         refresh();
       }
     }),
@@ -83,7 +83,7 @@ export function pinStatusBar(pin: StatusBarPin | null | undefined): void {
  */
 export function setPlayingState(playing: boolean): void {
   if (playing) {
-    pinStatusBar({ text: '$(loading~spin) Telemetry playing', tooltip: 'Ethos: Stop telemetry playback', command: 'ethos.stopTelemetry' });
+    pinStatusBar({ text: '$(loading~spin) Telemetry playing', tooltip: 'Ethos: Stop telemetry playback', command: 'ethosSimManager.stopTelemetry' });
   } else {
     pinStatusBar(null);
   }

@@ -9,7 +9,7 @@ export function firmwareLabel(firmware: string, version: string | undefined): st
 
 export function getSimulatorFolder(): string {
   const folder = vscode.workspace.getConfiguration().get<string>(
-    'ethos.simulatorFolder',
+    'ethosSimManager.simulatorFolder',
     DEFAULT_SIMULATOR_FOLDER,
   );
   return folder.trim().replace(/^\/+|\/+$/g, '') || DEFAULT_SIMULATOR_FOLDER;

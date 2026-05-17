@@ -7,13 +7,14 @@ import { createStatusBar, pinStatusBar } from './statusBar';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
-    vscode.commands.registerCommand('ethos.addSimulator', () => addSimulator(context)),
-    vscode.commands.registerCommand('ethos.setSimulator', () => setFirmware()),
-    vscode.commands.registerCommand('ethos.showSimMenu', () => showSimMenu()),
-    vscode.commands.registerCommand('ethos.playTelemetry', () => playTelemetryCommand()),
-    vscode.commands.registerCommand('ethos.stopTelemetry', () => stopTelemetry()),
-    vscode.commands.registerCommand('ethos.pinStatusBar', (item) => pinStatusBar(item)),
+    vscode.commands.registerCommand('ethosSimManager.addSimulator', () => addSimulator(context)),
+    vscode.commands.registerCommand('ethosSimManager.setSimulator', () => setFirmware()),
+    vscode.commands.registerCommand('ethosSimManager.showSimMenu', () => showSimMenu()),
+    vscode.commands.registerCommand('ethosSimManager.playTelemetry', () => playTelemetryCommand()),
+    vscode.commands.registerCommand('ethosSimManager.stopTelemetry', () => stopTelemetry()),
+    vscode.commands.registerCommand('ethosSimManager.pinStatusBar', (item) => pinStatusBar(item as Parameters<typeof pinStatusBar>[0])),
   );
+
   createStatusBar(context);
 }
 

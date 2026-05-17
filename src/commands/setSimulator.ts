@@ -31,8 +31,8 @@ export async function setFirmware(): Promise<void> {
   }
 
   const config = vscode.workspace.getConfiguration();
-  const currentFirmware = config.get<string>('ethos.firmware', '');
-  const currentVersion = config.get<string>('ethos.version', DEFAULT_VERSION);
+  const currentFirmware = config.get<string>('ethosSimManager.firmware', '');
+  const currentVersion = config.get<string>('ethosSimManager.version', DEFAULT_VERSION);
   const currentDirName =
     currentVersion !== DEFAULT_VERSION
       ? `${currentFirmware}@${currentVersion}`
@@ -55,7 +55,7 @@ export async function setFirmware(): Promise<void> {
   if (!picked) { return; }
 
   if (picked.label === ADD_SIMULATOR_LABEL) {
-    vscode.commands.executeCommand('ethos.addSimulator').then(undefined, err =>
+    vscode.commands.executeCommand('ethosSimManager.addSimulator').then(undefined, err =>
       console.error('Ethos: addSimulator failed:', err),
     );
     return;
@@ -71,7 +71,7 @@ export async function applyFirmware(dirName: string): Promise<void> {
   const root = `${getSimulatorFolder()}/${dirName}`;
 
   const config = vscode.workspace.getConfiguration();
-  await config.update('ethos.firmware', firmware, vscode.ConfigurationTarget.Workspace);
-  await config.update('ethos.version', version, vscode.ConfigurationTarget.Workspace);
+  await config.update('ethosSimManager.firmware', firmware, vscode.ConfigurationTarget.Workspace);
+  await config.update('ethosSimManager.version', version, vscode.ConfigurationTarget.Workspace);
   await config.update('ethos.root', root, vscode.ConfigurationTarget.Workspace);
 }

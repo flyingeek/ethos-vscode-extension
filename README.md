@@ -17,16 +17,16 @@ Note: the simulator name comes from Rob's vscode-template; `simulators/` or a us
 ## Configuration
 
 | Setting | Type | Default | Description |
-|---|---|---|---|
-| `ethos.simulatorFolder` | `string` | `"simulator"` | Relative path to the simulator directory within the workspace |
-| `ethos.telemetrySpeed` | `number` | `1` | Default replay speed multiplier (1 = real-time, 2 = double speed) |
-| `ethos.telemetryLoop` | `boolean` | `false` | Whether telemetry playback loops back to the beginning when the file ends |
+| --- | --- | --- | --- |
+| `ethosSimManager.simulatorFolder` | `string` | `"simulator"` | Relative path to the simulator directory within the workspace |
+| `ethosSimManager.telemetrySpeed` | `number` | `1` | Default replay speed multiplier (1 = real-time, 2 = double speed) |
+| `ethosSimManager.telemetryLoop` | `boolean` | `false` | Whether telemetry playback loops back to the beginning when the file ends |
 
 ## Status Bar
 
 The status bar item displays the active simulator firmware. Clicking it opens the **Ethos: Show Menu** quick pick (see below). If `.vscode/sim-menu.json` is absent, empty, or invalid, the click falls back to **Ethos: Set Simulator** directly.
 
-`ethos.statusBarText` supports `${firmware}`, `${version}`, and `${versionSuffix}` placeholders. `${versionSuffix}` expands to `@<version>` only when the configured version is not `nightly26`; otherwise it expands to an empty string.
+`ethosSimManager.statusBarText` supports `${firmware}`, `${version}`, and `${versionSuffix}` placeholders. `${versionSuffix}` expands to `@<version>` only when the configured version is not `nightly26`; otherwise it expands to an empty string.
 
 During telemetry playback the item switches to a spinning indicator (`Telemetry playing`). Clicking it while playing triggers **Ethos: Stop Telemetry**.
 
@@ -34,11 +34,14 @@ During telemetry playback the item switches to a spinning indicator (`Telemetry 
 
 **Ethos: Play Telemetry CSV** replays a flight log into the running Ethos simulator via the `ethos.injectTelemetry` API:
 
+Telemetry frame discovery uses `sensors.json` from the simulator root configured in `ethos.root`.
+
 1. Pick a CSV file from the workspace (or browse the file system).
 2. Select a replay speed (`1×`, `2×`, `5×`, `10×`).
 3. Choose **Play once** or **Loop**.
 
 Supported formats:
+
 - **Ethos log** — columns such as `Altitude(m)`, `RxBatt(V)`, `ESC voltage(V)`, `RSSI 2.4G(dB)`, `GPS` (space-separated lat lon), …
 - **EdgeTX log** — columns such as `Alt(m)`, `RxBt(V)`, `1RSS(dB)`, `RQly(%)`, `Curr(A)`, `GPS` (space-separated lat lon), …
 
@@ -51,7 +54,7 @@ Create `.vscode/sim-menu.json` to define a custom quick pick shown when clicking
 Each item supports the following fields:
 
 | Field | Type | Description |
-|---|---|---|
+| --- | --- | --- |
 | `label` | `string` | Display text (supports VS Code icon syntax, e.g. `$(debug-start)`) |
 | `description` | `string` | Optional secondary text shown next to the label |
 | `command` | `string \| string[]` | VS Code command ID(s) to execute sequentially |
@@ -72,7 +75,7 @@ Each item supports the following fields:
     },
     {
         "label": "🆑 Clear Logfile",
-        "command": ["ethos.clearLogfile", "ethos.showSimMenu"]
+        "command": ["ethos.clearLogfile", "ethosSimManager.showSimMenu"]
     },
     { "label": "", "separator": true },
     {
@@ -89,12 +92,12 @@ Each item supports the following fields:
     },
     {
         "label": "📊 Telemetry playback",
-        "command": "ethos.playTelemetry"
+        "command": "ethosSimManager.playTelemetry"
     },
     { "label": "", "separator": true },
     {
         "label": "⚙️ Change SIM",
-        "command": ["ethos.setSimulator", "ethos.showSimMenu"]
+        "command": ["ethosSimManager.setSimulator", "ethosSimManager.showSimMenu"]
     }
 ]
 ```

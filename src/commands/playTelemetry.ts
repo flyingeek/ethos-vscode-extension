@@ -63,8 +63,8 @@ export async function playTelemetryCommand(): Promise<void> {
 
   // ── 2. Speed picker ───────────────────────────────────────────────────────
   const config = vscode.workspace.getConfiguration();
-  const savedSpeed = config.get<number>('ethos.telemetrySpeed', 1);
-  const savedLoop = config.get<boolean>('ethos.telemetryLoop', false);
+  const savedSpeed = config.get<number>('ethosSimManager.telemetrySpeed', 1);
+  const savedLoop = config.get<boolean>('ethosSimManager.telemetryLoop', false);
 
   const SPEED_OPTIONS = ['1×', '2×', '5×', '10×'];
   const speedLabel = `${savedSpeed}×`;
@@ -102,8 +102,8 @@ export async function playTelemetryCommand(): Promise<void> {
   const loop = pickedLoop.label === 'Loop';
 
   // Persist choices
-  await config.update('ethos.telemetrySpeed', speed, vscode.ConfigurationTarget.Workspace);
-  await config.update('ethos.telemetryLoop', loop, vscode.ConfigurationTarget.Workspace);
+  await config.update('ethosSimManager.telemetrySpeed', speed, vscode.ConfigurationTarget.Workspace);
+  await config.update('ethosSimManager.telemetryLoop', loop, vscode.ConfigurationTarget.Workspace);
 
   // ── 4. Play ───────────────────────────────────────────────────────────────
   activeCts = new vscode.CancellationTokenSource();
