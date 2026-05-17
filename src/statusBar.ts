@@ -26,8 +26,8 @@ export function createStatusBar(context: vscode.ExtensionContext): void {
       return;
     }
 
-    const firmware = config.get<string>('ethosSimManager.firmware');
-    const version = config.get<string>('ethosSimManager.version');
+    const firmware = config.get<string>('ethos.firmware');
+    const version = config.get<string>('ethos.version');
     const template = config.get<string>('ethosSimManager.statusBarText', '$(radio-tower) ${firmware}${versionSuffix}');
     const command = config.get<string>('ethosSimManager.statusBarCommand', 'ethosSimManager.showSimMenu');
     const tooltip = config.get<string>('ethosSimManager.statusBarTooltip', 'Ethos: Show Menu');

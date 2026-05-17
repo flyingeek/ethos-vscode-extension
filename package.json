@@ -67,18 +67,6 @@
           "default": "Ethos: Show Menu",
           "description": "Tooltip shown on the Ethos status bar item.",
           "scope": "resource"
-        },
-        "ethosSimManager.firmware": {
-          "type": "string",
-          "default": "",
-          "description": "Active simulator firmware identifier.",
-          "scope": "resource"
-        },
-        "ethosSimManager.version": {
-          "type": "string",
-          "default": "nightly26",
-          "description": "Active simulator firmware version.",
-          "scope": "resource"
         }
       }
     },
