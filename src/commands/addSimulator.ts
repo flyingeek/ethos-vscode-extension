@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as jsoncParser from 'jsonc-parser';
 import { fetchStructuredData } from '../api';
 import { applyFirmware } from './setSimulator';
 import { DEFAULT_VERSION, getSimulatorFolder } from '../constants';
@@ -66,62 +65,6 @@ export async function addSimulator(context: vscode.ExtensionContext): Promise<vo
     return;
   }
 
-  await updateTasksFirmwareOptions(workspaceRoot, simulatorUri);
   await applyFirmware(dirName);
 }
 
-async function updateTasksFirmwareOptions(
-  workspaceRoot: vscode.Uri,
-  simulatorUri: vscode.Uri,
-): Promise<void> {
-  const tasksUri = vscode.Uri.joinPath(workspaceRoot, '.vscode', 'tasks.json');
-
-  let content: string;
-  try {
-    const bytes = await vscode.workspace.fs.readFile(tasksUri);
-    content = Buffer.from(bytes).toString('utf-8');
-  } catch {
-    return; // tasks.json not found – skip
-  }
-
-  let entries: [string, vscode.FileType][] = [];
-  try {
-    entries = await vscode.workspace.fs.readDirectory(simulatorUri);
-  } catch {
-    return;
-  }
-
-  const firmwareOptions = entries
-    .filter(([name, type]) => type === vscode.FileType.Directory && !name.startsWith('.'))
-    .map(([name]) => name)
-    .sort();
-
-  const firmwareInput = {
-    id: 'firmware',
-    type: 'pickString',
-    description: 'Select simulator firmware',
-    options: firmwareOptions,
-  };
-
-  const modOpts: jsoncParser.ModificationOptions = {
-    formattingOptions: { tabSize: 2, insertSpaces: true },
-  };
-
-  const parsed = jsoncParser.parse(content) as { inputs?: Array<{ id?: string }> };
-  const inputs = parsed.inputs;
-
-  let edits: jsoncParser.Edit[];
-  if (!inputs) {
-    edits = jsoncParser.modify(content, ['inputs'], [firmwareInput], modOpts);
-  } else {
-    const idx = inputs.findIndex(i => i.id === 'firmware');
-    if (idx !== -1) {
-      edits = jsoncParser.modify(content, ['inputs', idx], firmwareInput, modOpts);
-    } else {
-      edits = jsoncParser.modify(content, ['inputs', inputs.length], firmwareInput, modOpts);
-    }
-  }
-
-  const updated = jsoncParser.applyEdits(content, edits);
-  await vscode.workspace.fs.writeFile(tasksUri, Buffer.from(updated, 'utf-8'));
-}

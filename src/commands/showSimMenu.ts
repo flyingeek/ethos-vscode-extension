@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as jsoncParser from 'jsonc-parser';
 import { firmwareLabel } from '../constants';
 
 interface SimMenuItem {
@@ -32,7 +31,7 @@ export async function showSimMenu(): Promise<void> {
 
   let items: SimMenuItem[];
   try {
-    items = jsoncParser.parse(content) as SimMenuItem[];
+    items = JSON.parse(content) as SimMenuItem[];
     if (!Array.isArray(items)) { fallback(); return; }
   } catch {
     fallback();
