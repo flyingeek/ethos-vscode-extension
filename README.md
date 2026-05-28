@@ -22,7 +22,7 @@ The extension is only activated in workspaces where the [bsongis.ethos](https://
 
 **Ethos: Play Telemetry CSV** replays a flight log into the running Ethos simulator via the `ethos.injectTelemetry` API:
 
-Telemetry frame discovery uses `sensors.json` from the simulator root configured in `ethos.root`.
+Telemetry frame discovery uses `sensors.json` from the simulator root.
 
 1. Pick a CSV file from the workspace (or browse the file system).
 2. Select a replay speed (`1×`, `2×`, `5×`, `10×`).
@@ -34,6 +34,8 @@ Supported formats:
 - **EdgeTX log** — columns such as `Alt(m)`, `RxBt(V)`, `1RSS(dB)`, `RQly(%)`, `Curr(A)`, `GPS` (space-separated lat lon), …
 
 Only frames listed in `sensors.json` (as returned by `ethos.getSensors`) are injected — extra CSV columns are silently ignored. The progress notification shows the current row, percentage, and the frame names sent on each tick. Playback can be cancelled via the notification's cancel button or the **Ethos: Stop Telemetry** command.
+
+> **Note:** You can read more information in the [telemetry doc file](./docs/telemetry.md).
 
 ## ethos-menu.json
 
