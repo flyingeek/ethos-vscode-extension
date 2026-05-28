@@ -1,12 +1,12 @@
 {
-  "name": "ethos-sim-manager",
-  "displayName": "Ethos Simulator Manager",
-  "description": "Add and manage Ethos simulator firmware from VS Code",
-  "version": "0.4.0",
+  "name": "ethos-vscode-extension",
+  "displayName": "Ethos VSCode Extension",
+  "description": "Telemetry replay for the Ethos Simulator",
+  "version": "0.5.0",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
-    "url": "https://github.com/flyingeek/ethos-sim-manager"
+    "url": "https://github.com/flyingeek/ethos-vscode-extension"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -23,73 +23,31 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Ethos Simulator Manager",
+      "title": "Ethos VSCode Extension",
       "properties": {
-        "ethosSimManager.simulatorFolder": {
-          "type": "string",
-          "default": "simulator",
-          "description": "Relative path to the simulator directory within the workspace.",
-          "scope": "resource"
-        },
-        "ethosSimManager.telemetrySpeed": {
+        "ethosExt.telemetrySpeed": {
           "type": "number",
           "default": 1,
           "minimum": 0.1,
           "description": "Default telemetry replay speed multiplier (1 = real-time, 2 = double speed).",
           "scope": "resource"
         },
-        "ethosSimManager.telemetryLoop": {
+        "ethosExt.telemetryLoop": {
           "type": "boolean",
           "default": false,
           "description": "Whether telemetry playback loops back to the beginning when the file ends.",
-          "scope": "resource"
-        },
-        "ethosSimManager.statusBarEnable": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show or hide the Ethos status bar item.",
-          "scope": "resource"
-        },
-        "ethosSimManager.statusBarText": {
-          "type": "string",
-          "default": "$(radio-tower) ${firmware}${versionSuffix}",
-          "description": "Status bar label. Supports ${firmware}, ${version}, and ${versionSuffix} placeholders. ${versionSuffix} renders @<version> only when version is not nightly26.",
-          "scope": "resource"
-        },
-        "ethosSimManager.statusBarCommand": {
-          "type": "string",
-          "default": "ethosSimManager.showSimMenu",
-          "description": "Command to run when clicking the Ethos status bar item.",
-          "scope": "resource"
-        },
-        "ethosSimManager.statusBarTooltip": {
-          "type": "string",
-          "default": "Ethos: Show Menu",
-          "description": "Tooltip shown on the Ethos status bar item.",
           "scope": "resource"
         }
       }
     },
     "commands": [
       {
-        "command": "ethosSimManager.addSimulator",
-        "title": "Ethos Sim Manager: Add Simulator"
+        "command": "ethosExt.playTelemetry",
+        "title": "Ethos: Play Telemetry CSV"
       },
       {
-        "command": "ethosSimManager.setSimulator",
-        "title": "Ethos Sim Manager: Set Simulator"
-      },
-      {
-        "command": "ethosSimManager.showSimMenu",
-        "title": "Ethos Sim Manager: Show Menu"
-      },
-      {
-        "command": "ethosSimManager.playTelemetry",
-        "title": "Ethos Sim Manager: Play Telemetry CSV"
-      },
-      {
-        "command": "ethosSimManager.stopTelemetry",
-        "title": "Ethos Sim Manager: Stop Telemetry"
+        "command": "ethosExt.stopTelemetry",
+        "title": "Ethos: Stop Telemetry"
       }
     ]
   },

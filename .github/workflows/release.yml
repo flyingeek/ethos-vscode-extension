@@ -36,4 +36,4 @@ jobs:
           gh release create "$TAG" \
             --title "v${VERSION}" \
             --generate-notes \
-            ethos-sim-manager-*.vsix
+            ethos-vscode-extension-*.vsix

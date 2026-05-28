@@ -1,9 +1,47 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { playTelemetry, countDataRows } from '../telemetry/player';
-import { setPlayingState } from '../statusBar';
 
 let activeCts: vscode.CancellationTokenSource | undefined;
+let runningStateSubscription: vscode.Disposable | undefined;
+
+const TELEMETRY_PIN = {
+  text: '$(loading~spin) Telemetry playing',
+  command: 'ethosExt.stopTelemetry',
+  tooltip: 'Ethos: Stop telemetry playback',
+} as const;
+
+async function pinTelemetryStatus(playing: boolean): Promise<void> {
+  try {
+    await vscode.commands.executeCommand('ethos.pinStatusBar', playing ? TELEMETRY_PIN : undefined);
+  } catch (err) {
+    console.error('Ethos: pinStatusBar failed:', err);
+  }
+}
+
+interface EthosApi {
+  isRunning: () => boolean;
+  onDidChangeRunningState: vscode.Event<boolean>;
+}
+
+async function getEthosApi(): Promise<EthosApi | undefined> {
+  const extension = vscode.extensions.getExtension<EthosApi>('bsongis.ethos');
+  if (!extension) {
+    return undefined;
+  }
+
+  try {
+    return await extension.activate();
+  } catch (err) {
+    console.error('Ethos: failed to activate API:', err);
+    return undefined;
+  }
+}
+
+function clearRunningStateSubscription(): void {
+  runningStateSubscription?.dispose();
+  runningStateSubscription = undefined;
+}
 
 export function stopTelemetry(): void {
   activeCts?.cancel();
@@ -12,6 +50,17 @@ export function stopTelemetry(): void {
 export async function playTelemetryCommand(): Promise<void> {
   if (activeCts) {
     vscode.window.showWarningMessage('Telemetry playback is already running. Stop it first.');
+    return;
+  }
+
+  const ethosApi = await getEthosApi();
+  if (!ethosApi) {
+    vscode.window.showWarningMessage('Ethos extension is not available.');
+    return;
+  }
+
+  if (!ethosApi.isRunning()) {
+    vscode.window.showWarningMessage('Start the Ethos simulator before playing telemetry.');
     return;
   }
 
@@ -63,8 +112,12 @@ export async function playTelemetryCommand(): Promise<void> {
 
   // ── 2. Speed picker ───────────────────────────────────────────────────────
   const config = vscode.workspace.getConfiguration();
-  const savedSpeed = config.get<number>('ethosSimManager.telemetrySpeed', 1);
-  const savedLoop = config.get<boolean>('ethosSimManager.telemetryLoop', false);
+  const savedSpeed = config.get<number>('ethosExt.telemetrySpeed')
+    ?? config.get<number>('ethos.telemetrySpeed')
+    ?? 1;
+  const savedLoop = config.get<boolean>('ethosExt.telemetryLoop')
+    ?? config.get<boolean>('ethos.telemetryLoop')
+    ?? false;
 
   const SPEED_OPTIONS = ['1×', '2×', '5×', '10×'];
   const speedLabel = `${savedSpeed}×`;
@@ -102,17 +155,28 @@ export async function playTelemetryCommand(): Promise<void> {
   const loop = pickedLoop.label === 'Loop';
 
   // Persist choices
-  await config.update('ethosSimManager.telemetrySpeed', speed, vscode.ConfigurationTarget.Workspace);
-  await config.update('ethosSimManager.telemetryLoop', loop, vscode.ConfigurationTarget.Workspace);
+  await config.update('ethosExt.telemetrySpeed', speed, vscode.ConfigurationTarget.Workspace);
+  await config.update('ethosExt.telemetryLoop', loop, vscode.ConfigurationTarget.Workspace);
 
   // ── 4. Play ───────────────────────────────────────────────────────────────
   activeCts = new vscode.CancellationTokenSource();
   const token = activeCts.token;
-  setPlayingState(true);
-
-  const totalRows = await countDataRows(filePath);
+  clearRunningStateSubscription();
+  runningStateSubscription = ethosApi.onDidChangeRunningState(running => {
+    if (!running) {
+      activeCts?.cancel();
+    }
+  });
 
   try {
+    const totalRows = await countDataRows(filePath);
+
+    if (token.isCancellationRequested || !ethosApi.isRunning()) {
+      return;
+    }
+
+    await pinTelemetryStatus(true);
+
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -153,6 +217,7 @@ export async function playTelemetryCommand(): Promise<void> {
   } finally {
     activeCts.dispose();
     activeCts = undefined;
-    setPlayingState(false);
+    clearRunningStateSubscription();
+    await pinTelemetryStatus(false);
   }
 }
