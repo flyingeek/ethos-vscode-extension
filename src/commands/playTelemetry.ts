@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { playTelemetry, countDataRows } from '../telemetry/player';
+import { getEthosApi } from '../utils/ethosApi';
 
 let activeCts: vscode.CancellationTokenSource | undefined;
 let runningStateSubscription: vscode.Disposable | undefined;
@@ -16,25 +17,6 @@ async function pinTelemetryStatus(playing: boolean): Promise<void> {
     await vscode.commands.executeCommand('ethos.pinStatusBar', playing ? TELEMETRY_PIN : undefined);
   } catch (err) {
     console.error('Ethos: pinStatusBar failed:', err);
-  }
-}
-
-interface EthosApi {
-  isRunning: () => boolean;
-  onDidChangeRunningState: vscode.Event<boolean>;
-}
-
-async function getEthosApi(): Promise<EthosApi | undefined> {
-  const extension = vscode.extensions.getExtension<EthosApi>('bsongis.ethos');
-  if (!extension) {
-    return undefined;
-  }
-
-  try {
-    return await extension.activate();
-  } catch (err) {
-    console.error('Ethos: failed to activate API:', err);
-    return undefined;
   }
 }
 

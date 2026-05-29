@@ -2,7 +2,7 @@
   "name": "ethos-vscode-extension",
   "displayName": "Ethos VSCode Extension",
   "description": "Telemetry replay for the Ethos Simulator",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
@@ -48,6 +48,10 @@
       {
         "command": "ethosExt.stopTelemetry",
         "title": "Ethos: Stop Telemetry"
+      },
+      {
+        "command": "ethosExt.setTelemetry",
+        "title": "Ethos: Set Telemetry Value"
       }
     ]
   },

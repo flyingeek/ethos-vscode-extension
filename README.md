@@ -6,6 +6,7 @@ It adds those commands to VS Code:
 
 - **Ethos: Play Telemetry CSV** — replay a CSV telemetry log (Ethos or EdgeTX format) into the running simulator and pin a telemetry status label in the Ethos extension
 - **Ethos: Stop Telemetry** — stop the current telemetry playback and clear the pinned status label
+- **Ethos: Set Telemetry Value** — pick a sensor frame by name and inject a single value into the running simulator
 
 The extension is only activated in workspaces where the [bsongis.ethos](https://marketplace.visualstudio.com/items?itemName=bsongis.ethos) extension is active. It requires `bsongis.ethos` to be installed.
 
@@ -37,6 +38,15 @@ Only frames listed in `sensors.json` (as returned by `ethos.getSensors`) are inj
 
 > **Note:** You can read more information in the [telemetry doc file](./docs/telemetry.md).
 
+## Set Telemetry Value
+
+**Ethos: Set Telemetry Value** lets you inject a single value into any sensor frame of the running Ethos simulator:
+
+1. Pick a frame from the list returned by `ethos.getSensors` (e.g. `Altitude`, `VSpeed`, `RSSI`).
+2. Enter the value in human-readable units (e.g. `150` for 150 m).
+
+The simulator is updated immediately. The command requires the Ethos simulator to be running.
+
 ## ethos-menu.json
 
 To integrate with the Ethos extension's menu, add entries to your project's `ethos-menu.json` file:
@@ -46,6 +56,10 @@ To integrate with the Ethos extension's menu, add entries to your project's `eth
     {
         "label": "📊 Telemetry playback",
         "command": "ethosExt.playTelemetry"
+    },
+    {
+        "label": "✏️ Set telemetry value",
+        "command": "ethosExt.setTelemetry"
     }
 ]
 ```

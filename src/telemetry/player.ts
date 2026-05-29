@@ -165,7 +165,7 @@ async function playPass(
     }
 
     if (payload.length > 0) {
-      await vscode.commands.executeCommand('ethos.injectTelemetry', payload);
+      await vscode.commands.executeCommand('ethos.injectTelemetry', payload, true);
     }
 
     rowIndex++;
