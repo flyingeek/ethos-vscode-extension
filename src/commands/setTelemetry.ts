@@ -17,7 +17,7 @@ export async function setTelemetryCommand(): Promise<void> {
   let frames: string[];
   try {
     const raw = await vscode.commands.executeCommand<string[]>('ethos.getSensors');
-    frames = [...new Set(raw ?? [])].sort();
+    frames = [...new Set(raw ?? [])].filter(f => f !== '').sort();
   } catch (err) {
     vscode.window.showErrorMessage(`Failed to retrieve sensors: ${err}`);
     return;

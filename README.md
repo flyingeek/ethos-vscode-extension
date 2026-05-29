@@ -14,10 +14,9 @@ The extension is only activated in workspaces where the [bsongis.ethos](https://
 
 ## Configuration
 
-| Setting | Type | Default | Description |
-|---|---|---|---|
-| `ethosExt.telemetrySpeed` | `number` | `1` | Default replay speed multiplier (1 = real-time, 2 = double speed) |
-| `ethosExt.telemetryLoop` | `boolean` | `false` | Whether telemetry playback loops back to the beginning when the file ends |
+| Setting | Type | Description |
+|---|---|---|
+| `ethosExt.telemetryCustomSpeed` | `number` | Optional custom replay speed multiplier for telemetry playback. If set, it will appear as an option in the speed picker during playback. |
 
 ## Telemetry Playback
 
@@ -26,7 +25,7 @@ The extension is only activated in workspaces where the [bsongis.ethos](https://
 Telemetry frame discovery uses `sensors.json` from the simulator root.
 
 1. Pick a CSV file from the workspace (or browse the file system).
-2. Select a replay speed (`1×`, `2×`, `5×`, `10×`).
+2. Select a replay speed (`1×`, `2×`, `5×`, `10×`, or a custom value if configured via `ethosExt.telemetryCustomSpeed`).
 3. Choose **Play once** or **Loop**.
 
 Supported formats:

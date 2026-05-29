@@ -29,7 +29,7 @@ export function stopTelemetry(): void {
   activeCts?.cancel();
 }
 
-export async function playTelemetryCommand(): Promise<void> {
+export async function playTelemetryCommand(context: vscode.ExtensionContext): Promise<void> {
   if (activeCts) {
     vscode.window.showWarningMessage('Telemetry playback is already running. Stop it first.');
     return;
@@ -47,28 +47,72 @@ export async function playTelemetryCommand(): Promise<void> {
   }
 
   // ── 1. File picker ────────────────────────────────────────────────────────
+  interface FileItem extends vscode.QuickPickItem { fsPath?: string; }
   const BROWSE_LABEL = '$(folder-opened) Browse file system…';
 
   const workspaceCsvFiles = await vscode.workspace.findFiles('**/*.csv', '**/node_modules/**');
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri;
 
-  const fileItems: vscode.QuickPickItem[] = workspaceCsvFiles
+  // Validate previously saved CSV path
+  let savedCsvPath: string | undefined;
+  const savedCsvPathRaw = context.workspaceState.get<string>('telemetryCSVPath');
+  if (savedCsvPathRaw) {
+    try {
+      await vscode.workspace.fs.stat(vscode.Uri.file(savedCsvPathRaw));
+      savedCsvPath = savedCsvPathRaw;
+    } catch {
+      // File no longer exists, discard
+      await context.workspaceState.update('telemetryCSVPath', undefined);
+    }
+  }
+
+  // Build items for workspace CSV files
+  const workspaceFileItems: FileItem[] = workspaceCsvFiles
     .map(uri => ({
       label: workspaceRoot
         ? path.relative(workspaceRoot.fsPath, uri.fsPath)
         : uri.fsPath,
       description: workspaceRoot ? undefined : uri.fsPath,
+      fsPath: uri.fsPath,
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
+  const fileItems: FileItem[] = [];
+
+  // If saved path is outside the workspace (browsed externally), prepend it
+  const savedInWorkspace = savedCsvPath !== undefined &&
+    workspaceCsvFiles.some(u => u.fsPath === savedCsvPath);
+  if (savedCsvPath && !savedInWorkspace) {
+    fileItems.push({
+      label: path.basename(savedCsvPath),
+      description: savedCsvPath,
+      fsPath: savedCsvPath,
+    });
+    if (workspaceFileItems.length > 0) {
+      fileItems.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
+    }
+  }
+
+  fileItems.push(...workspaceFileItems);
   fileItems.push(
     { label: '', kind: vscode.QuickPickItemKind.Separator },
     { label: BROWSE_LABEL },
   );
 
-  const pickedFile = await vscode.window.showQuickPick(fileItems, {
-    placeHolder: 'Select a CSV telemetry file',
-    title: 'Play Telemetry (1/3)',
+  // Find the item to pre-select
+  const activeFileItem = savedCsvPath
+    ? fileItems.find(i => i.fsPath === savedCsvPath)
+    : undefined;
+
+  const pickedFile = await new Promise<FileItem | undefined>(resolve => {
+    const qp = vscode.window.createQuickPick<FileItem>();
+    qp.items = fileItems;
+    qp.placeholder = 'Select a CSV telemetry file';
+    qp.title = 'Play Telemetry (1/3)';
+    if (activeFileItem) { qp.activeItems = [activeFileItem]; }
+    qp.onDidAccept(() => { resolve(qp.selectedItems[0]); qp.dispose(); });
+    qp.onDidHide(() => { resolve(undefined); qp.dispose(); });
+    qp.show();
   });
   if (!pickedFile) { return; }
 
@@ -82,63 +126,68 @@ export async function playTelemetryCommand(): Promise<void> {
     if (!uris || uris.length === 0) { return; }
     filePath = uris[0].fsPath;
   } else {
-    const uri = workspaceCsvFiles.find(u => {
-      const rel = workspaceRoot
-        ? path.relative(workspaceRoot.fsPath, u.fsPath)
-        : u.fsPath;
-      return rel === pickedFile.label || u.fsPath === pickedFile.label;
-    });
-    if (!uri) { return; }
-    filePath = uri.fsPath;
+    if (!pickedFile.fsPath) { return; }
+    filePath = pickedFile.fsPath;
   }
 
+  await context.workspaceState.update('telemetryCSVPath', filePath);
+
   // ── 2. Speed picker ───────────────────────────────────────────────────────
+  interface SpeedItem extends vscode.QuickPickItem { multiplier: number; }
   const config = vscode.workspace.getConfiguration();
-  const savedSpeed = config.get<number>('ethosExt.telemetrySpeed')
-    ?? config.get<number>('ethos.telemetrySpeed')
-    ?? 1;
-  const savedLoop = config.get<boolean>('ethosExt.telemetryLoop')
-    ?? config.get<boolean>('ethos.telemetryLoop')
-    ?? false;
+  const customSpeed = config.get<number>('ethosExt.telemetryCustomSpeed');
+  const savedSpeed = context.workspaceState.get<number>('telemetrySpeed') ?? 1;
 
-  const SPEED_OPTIONS = ['1×', '2×', '5×', '10×'];
-  const speedLabel = `${savedSpeed}×`;
-  const defaultSpeedLabel = SPEED_OPTIONS.includes(speedLabel) ? speedLabel : '1×';
+  const baseMultipliers = [1, 2, 5, 10];
+  const speedItems: SpeedItem[] = [];
 
-  const pickedSpeed = await vscode.window.showQuickPick(
-    SPEED_OPTIONS.map(s => ({
-      label: s,
-      description: s === defaultSpeedLabel ? '(saved)' : undefined,
-    })),
-    {
-      placeHolder: 'Select replay speed',
-      title: 'Play Telemetry (2/3)',
-    },
-  );
+  // Prepend custom speed if defined and not already a preset
+  if (customSpeed !== undefined && !baseMultipliers.includes(customSpeed)) {
+    speedItems.push({ label: `${customSpeed}×`, multiplier: customSpeed });
+  }
+  speedItems.push(...baseMultipliers.map(m => ({ label: `${m}×`, multiplier: m })));
+
+  const activeSpeedItem = speedItems.find(i => i.multiplier === savedSpeed) ?? speedItems[0];
+
+  const pickedSpeed = await new Promise<SpeedItem | undefined>(resolve => {
+    const qp = vscode.window.createQuickPick<SpeedItem>();
+    qp.items = speedItems;
+    qp.placeholder = 'Select replay speed';
+    qp.title = 'Play Telemetry (2/3)';
+    qp.activeItems = [activeSpeedItem];
+    qp.onDidAccept(() => { resolve(qp.selectedItems[0]); qp.dispose(); });
+    qp.onDidHide(() => { resolve(undefined); qp.dispose(); });
+    qp.show();
+  });
   if (!pickedSpeed) { return; }
-  const speed = parseFloat(pickedSpeed.label.replace('×', ''));
+  const speed = pickedSpeed.multiplier;
 
   // ── 3. Loop picker ────────────────────────────────────────────────────────
-  const LOOP_OPTIONS = [
+  interface LoopItem extends vscode.QuickPickItem { value: boolean; }
+  const savedLoop = context.workspaceState.get<boolean>('telemetryLoop') ?? false;
+
+  const loopItems: LoopItem[] = [
     { label: 'Play once', value: false },
     { label: 'Loop', value: true },
   ];
-  const pickedLoop = await vscode.window.showQuickPick(
-    LOOP_OPTIONS.map(o => ({
-      label: o.label,
-      description: o.value === savedLoop ? '(saved)' : undefined,
-    })),
-    {
-      placeHolder: 'Play once or loop?',
-      title: 'Play Telemetry (3/3)',
-    },
-  );
-  if (!pickedLoop) { return; }
-  const loop = pickedLoop.label === 'Loop';
+  const activeLoopItem = loopItems.find(i => i.value === savedLoop) ?? loopItems[0];
 
-  // Persist choices
-  await config.update('ethosExt.telemetrySpeed', speed, vscode.ConfigurationTarget.Workspace);
-  await config.update('ethosExt.telemetryLoop', loop, vscode.ConfigurationTarget.Workspace);
+  const pickedLoop = await new Promise<LoopItem | undefined>(resolve => {
+    const qp = vscode.window.createQuickPick<LoopItem>();
+    qp.items = loopItems;
+    qp.placeholder = 'Play once or loop?';
+    qp.title = 'Play Telemetry (3/3)';
+    qp.activeItems = [activeLoopItem];
+    qp.onDidAccept(() => { resolve(qp.selectedItems[0]); qp.dispose(); });
+    qp.onDidHide(() => { resolve(undefined); qp.dispose(); });
+    qp.show();
+  });
+  if (!pickedLoop) { return; }
+  const loop = pickedLoop.value;
+
+  // Persist choices to workspace state
+  await context.workspaceState.update('telemetrySpeed', speed);
+  await context.workspaceState.update('telemetryLoop', loop);
 
   // ── 4. Play ───────────────────────────────────────────────────────────────
   activeCts = new vscode.CancellationTokenSource();
