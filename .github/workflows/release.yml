@@ -6,10 +6,20 @@ on:
       - 'release/*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+  package:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: darwin-arm64
+          - os: macos-13
+            target: darwin-x64
+          - os: windows-latest
+            target: win32-x64
+          - os: ubuntu-latest
+            target: linux-x64
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -21,13 +31,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install vsce
-        run: npm install -g @vscode/vsce
+      - name: Rebuild native modules for VS Code Electron
+        run: npx @electron/rebuild -w node-hid
 
       - name: Package extension
-        run: vsce package
+        run: npx @vscode/vsce package --target ${{ matrix.target }}
 
-      - name: Upload VSIX to release
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.target }}
+          path: "*.vsix"
+
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all VSIX artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: vsix-*
+          merge-multiple: true
+
+      - name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
