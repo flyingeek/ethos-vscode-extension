@@ -20,9 +20,9 @@ jobs:
           - os: windows-latest
             target: win32-x64
             rebuild_arch: x64
-          - os: ubuntu-latest
-            target: linux-x64
-            rebuild_arch: x64
+          # - os: ubuntu-latest
+          #   target: linux-x64
+          #   rebuild_arch: x64
 
     runs-on: ${{ matrix.os }}
 
