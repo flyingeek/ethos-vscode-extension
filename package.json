@@ -2,7 +2,7 @@
   "name": "ethos-vscode-extension",
   "displayName": "Ethos VSCode Extension",
   "description": "Telemetry replay for the Ethos Simulator",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
@@ -30,6 +30,46 @@
           "minimum": 0.1,
           "description": "Custom replay speed multiplier for telemetry playback.",
           "scope": "resource"
+        },
+        "ethosExt.radio": {
+          "type": "object",
+          "scope": "resource",
+          "description": "Configuration for radio USB/HID connection.",
+          "properties": {
+            "vendorId": {
+              "type": "string",
+              "default": "0483",
+              "description": "USB vendor ID (hex, no 0x prefix) of the radio HID device."
+            },
+            "productId": {
+              "type": "string",
+              "default": "5750",
+              "description": "USB product ID (hex, no 0x prefix) of the radio HID device."
+            },
+            "retries": {
+              "type": "number",
+              "default": 10,
+              "minimum": 1,
+              "description": "Number of HID open attempts before giving up."
+            },
+            "retryDelay": {
+              "type": "number",
+              "default": 1.0,
+              "minimum": 0.1,
+              "description": "Delay in seconds between HID open retries."
+            },
+            "nameHint": {
+              "type": "string",
+              "default": "FrSky",
+              "description": "Manufacturer name hint used for fuzzy serial port matching when VID/PID is unavailable."
+            },
+            "serialBaud": {
+              "type": "number",
+              "default": 115200,
+              "minimum": 1200,
+              "description": "Baud rate for the radio serial debug console."
+            }
+          }
         },
         "ethosExt.deploy": {
           "type": "object",
@@ -103,6 +143,18 @@
       {
         "command": "ethosExt.deployRadio",
         "title": "Ethos: Deploy to Radio"
+      },
+      {
+        "command": "ethosExt.deployRadioLua",
+        "title": "Ethos: Deploy to Radio (Lua only)"
+      },
+      {
+        "command": "ethosExt.deployRadioFast",
+        "title": "Ethos: Deploy to Radio (fast)"
+      },
+      {
+        "command": "ethosExt.radioDebug",
+        "title": "Ethos: Radio Debug"
       }
     ]
   },
@@ -111,9 +163,13 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },
+  "dependencies": {
+    "node-hid": "^3.1.0"
+  },
   "devDependencies": {
     "@types/node": "18.x",
     "@types/vscode": "^1.85.0",
+    "@types/node-hid": "^1.3.4",
     "typescript": "^5.3.0"
   }
 }

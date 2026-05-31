@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { fork, exec } from 'child_process';
-import type { EthosMeta, DeployConfig, DeployStep } from './types';
+import type { EthosMeta, DeployConfig, DeployStep, DeployTarget } from './types';
 import { simulatorTarget } from './simulator';
 import { radioTarget } from './radio';
 
@@ -139,11 +139,15 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
     const channel = getOutputChannel();
 
     // --- Dispatch to target ---
-    const targetFn = target === 'radio' ? radioTarget : simulatorTarget;
-    const result = await targetFn(sourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel);
+    let result: DeployTarget | undefined;
+    if (target === 'radio' || target === 'radio-lua' || target === 'radio-fast') {
+        result = await radioTarget(sourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel, target);
+    } else {
+        result = await simulatorTarget(sourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel);
+    }
     if (!result) { return; }
 
-    const { destAppPath, destBase, deploy } = result;
+    const { destAppPath, destBase, deploy, finalize } = result;
 
     channel.show(true);
     channel.appendLine(`\n--- Ethos Deploy (${target}): ${new Date().toLocaleTimeString()} ---`);
@@ -156,7 +160,7 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
         async () => {
             await deploy();
 
-            // --- Post-deploy steps ---
+            // --- Post-deploy steps (volume still mounted) ---
             for (const step of steps) {
                 const label = typeof step === 'string' ? step : JSON.stringify(step);
                 channel.appendLine(`\n  > ${label}`);
@@ -164,9 +168,13 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
                 if (code !== 0) {
                     channel.appendLine(`  step failed with exit code ${code}, aborting remaining steps.`);
                     vscode.window.showErrorMessage(`Ethos Deploy: step failed (exit ${code}). See "Ethos Deploy" output.`);
+                    await finalize?.();
                     return;
                 }
             }
+
+            // --- Unmount + close HID after steps have finished ---
+            await finalize?.();
         }
     );
 

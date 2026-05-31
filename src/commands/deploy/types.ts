@@ -20,4 +20,6 @@ export interface DeployTarget {
     destAppPath: string;
     destBase: string;
     deploy: () => Promise<void>;
+    /** Called after post-deploy steps to unmount volumes and close HID. */
+    finalize?: () => Promise<void>;
 }
