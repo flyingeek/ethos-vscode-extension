@@ -4,6 +4,23 @@ on:
   push:
     tags:
       - 'release/*'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'VSIX target to build'
+        type: choice
+        required: true
+        default: linux-x64
+        options:
+          - all
+          - darwin-arm64
+          - darwin-x64
+          - win32-x64
+          - linux-x64
+      tag:
+        description: 'Optional release tag (example: release/0.6.4). If set, create/update release.'
+        type: string
+        required: false
 
 jobs:
   package:
@@ -20,39 +37,68 @@ jobs:
           - os: windows-latest
             target: win32-x64
             rebuild_arch: x64
-          # - os: ubuntu-latest
-          #   target: linux-x64
-          #   rebuild_arch: x64
+          - os: ubuntu-latest
+            target: linux-x64
+            rebuild_arch: x64
 
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Select targets for manual runs
+        id: selection
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TARGET: ${{ github.event.inputs.target }}
+          MATRIX_TARGET: ${{ matrix.target }}
+        run: |
+          SHOULD_RUN=true
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$INPUT_TARGET" != "all" ] && [ "$INPUT_TARGET" != "$MATRIX_TARGET" ]; then
+            SHOULD_RUN=false
+          fi
+          echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
+        if: steps.selection.outputs.should_run == 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.selection.outputs.should_run == 'true'
         with:
           node-version: '20'
 
       # node-gyp 10+ no longer works with Python 3.12 (distutils removed),
       # and macos-latest / windows-latest now ship 3.12+. Pin to 3.11.
       - uses: actions/setup-python@v5
+        if: steps.selection.outputs.should_run == 'true'
         with:
           python-version: '3.11'
 
       - name: Install Linux native dependencies
-        if: runner.os == 'Linux'
+        if: steps.selection.outputs.should_run == 'true' && runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libudev-dev libusb-1.0-0-dev
 
       - name: Configure MSVC (Windows)
-        if: runner.os == 'Windows'
+        if: steps.selection.outputs.should_run == 'true' && runner.os == 'Windows'
         uses: microsoft/setup-msbuild@v2
 
       # Skip install scripts so node-hid is NOT compiled against the Node version
       # we set up above — we'll rebuild it explicitly against Electron below.
       - name: Install dependencies
+        if: steps.selection.outputs.should_run == 'true'
         run: npm ci --ignore-scripts
 
+      # Linux-only workaround: node-hid@3.3.0 pulls an old node-addon-api
+      # via lockfile. Newer VS Code Electron headers can fail to compile with
+      # that version, so refresh node-addon-api only for Linux packaging.
+      - name: Linux workaround for node-addon-api
+        if: steps.selection.outputs.should_run == 'true' && runner.os == 'Linux'
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts node-addon-api@^8
+          node -p "'node-addon-api=' + require('./node_modules/node-addon-api/package.json').version"
+
       - name: Resolve VS Code Electron version
+        if: steps.selection.outputs.should_run == 'true'
         id: electron
         shell: bash
         env:
@@ -71,6 +117,7 @@ jobs:
           echo "Electron version: $VERSION"
 
       - name: Cache electron headers
+        if: steps.selection.outputs.should_run == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -80,6 +127,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.rebuild_arch }}-electron-${{ steps.electron.outputs.version }}
 
       - name: Rebuild node-hid for VS Code Electron
+        if: steps.selection.outputs.should_run == 'true'
         shell: bash
         run: |
           ./node_modules/.bin/electron-rebuild \
@@ -91,7 +139,7 @@ jobs:
       # Sanity check: the rebuilt binary must load. Skip cross-compiled darwin-x64
       # on arm64 runner (binary is the wrong arch for the host).
       - name: Verify node-hid binary
-        if: ${{ matrix.target != 'darwin-x64' }}
+        if: steps.selection.outputs.should_run == 'true' && matrix.target != 'darwin-x64'
         shell: bash
         run: |
           node -e "const h=require('node-hid'); console.log('node-hid loaded; devices=', h.devices().length)" || {
@@ -100,23 +148,28 @@ jobs:
           }
 
       - name: Compile TypeScript
+        if: steps.selection.outputs.should_run == 'true'
         run: npm run compile
 
       - name: Prune dev dependencies
+        if: steps.selection.outputs.should_run == 'true'
         run: |
           npm prune --omit=dev --ignore-scripts
           npm pkg set scripts.vscode:prepublish="echo already compiled"
 
       - name: Package extension
+        if: steps.selection.outputs.should_run == 'true'
         run: npx --yes @vscode/vsce package --target ${{ matrix.target }}
 
       - name: Upload VSIX artifact
+        if: steps.selection.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: vsix-${{ matrix.target }}
           path: "*.vsix"
 
   release:
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '') }}
     needs: package
     runs-on: ubuntu-latest
     permissions:
@@ -134,8 +187,12 @@ jobs:
       - name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          TAG="${INPUT_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_REF_NAME}"
+          fi
           VERSION="${TAG#release/}"
           gh release create "$TAG" \
             --title "v${VERSION}" \
