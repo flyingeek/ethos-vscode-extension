@@ -2,7 +2,7 @@
   "name": "ethos-vscode-extension",
   "displayName": "Ethos VSCode Extension",
   "description": "Telemetry replay for the Ethos Simulator",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
@@ -30,6 +30,28 @@
           "minimum": 0.1,
           "description": "Custom replay speed multiplier for telemetry playback.",
           "scope": "resource"
+        },
+        "ethosExt.deploy": {
+          "type": "object",
+          "scope": "resource",
+          "description": "Configuration for the Deploy to simulator command.",
+          "properties": {
+            "app": {
+              "type": "string",
+              "description": "Workspace-relative path to the source app folder (e.g. src/gps-qrcode)."
+            },
+            "manifest": {
+              "type": "string",
+              "default": "",
+              "description": "Workspace-relative path to the Ethos Lua manifest file. If set (non-empty), only files listed in the manifest are copied; otherwise all files are copied."
+            },
+            "steps": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": [],
+              "description": "Post-deploy commands. .js/.mjs paths are run with Node fork(); everything else via exec(). Use ${destPath} and ${sourcePath} as substitution variables."
+            }
+          }
         }
       }
     },
@@ -45,6 +67,14 @@
       {
         "command": "ethosExt.setTelemetry",
         "title": "Ethos: Set Telemetry Value"
+      },
+      {
+        "command": "ethosExt.deploySimulator",
+        "title": "Ethos: Deploy to Simulator"
+      },
+      {
+        "command": "ethosExt.deployRadio",
+        "title": "Ethos: Deploy to Radio"
       }
     ]
   },
