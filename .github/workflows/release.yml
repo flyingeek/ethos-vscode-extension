@@ -8,16 +8,21 @@ on:
 jobs:
   package:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
             target: darwin-arm64
-          - os: macos-13
+            rebuild_arch: arm64
+          - os: macos-latest
             target: darwin-x64
+            rebuild_arch: x64
           - os: windows-latest
             target: win32-x64
-          # - os: ubuntu-latest
-          #   target: linux-x64
+            rebuild_arch: x64
+          - os: ubuntu-latest
+            target: linux-x64
+            rebuild_arch: x64
 
     runs-on: ${{ matrix.os }}
 
@@ -26,36 +31,79 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+          node-version: '20'
+
+      # node-gyp 10+ no longer works with Python 3.12 (distutils removed),
+      # and macos-latest / windows-latest now ship 3.12+. Pin to 3.11.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Install Linux native dependencies
-        # if: runner.os == 'Linux'
-        # run: sudo apt-get install -y libudev-dev libusb-1.0-0-dev
-        if: false
-        run: echo 'Linux skipped'
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libudev-dev libusb-1.0-0-dev
 
+      - name: Configure MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v2
+
+      # Skip install scripts so node-hid is NOT compiled against the Node version
+      # we set up above — we'll rebuild it explicitly against Electron below.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Resolve VS Code Electron version
         id: electron
         shell: bash
         run: |
-          VERSION=$(curl -fsSL https://raw.githubusercontent.com/microsoft/vscode/main/package.json \
+          set -euo pipefail
+          TAG=$(curl -fsSL https://api.github.com/repos/microsoft/vscode/releases/latest \
+            | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).tag_name))")
+          VERSION=$(curl -fsSL "https://raw.githubusercontent.com/microsoft/vscode/${TAG}/package.json" \
             | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).devDependencies.electron.replace(/^\D+/,'')))")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Electron version: $VERSION"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "VS Code stable: $TAG -> Electron $VERSION"
 
-      - name: Rebuild native modules for VS Code Electron
-        run: npx @electron/rebuild -w node-hid -v ${{ steps.electron.outputs.version }}
+      - name: Cache electron headers
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.electron-gyp
+            ~/.cache/electron
+            ~/Library/Caches/electron
+          key: ${{ runner.os }}-${{ matrix.rebuild_arch }}-electron-${{ steps.electron.outputs.version }}
+
+      - name: Rebuild node-hid for VS Code Electron
+        shell: bash
+        run: |
+          ./node_modules/.bin/electron-rebuild \
+            --version "${{ steps.electron.outputs.version }}" \
+            --arch "${{ matrix.rebuild_arch }}" \
+            --only node-hid \
+            --force
+
+      # Sanity check: the rebuilt binary must load. Skip cross-compiled darwin-x64
+      # on arm64 runner (binary is the wrong arch for the host).
+      - name: Verify node-hid binary
+        if: ${{ matrix.target != 'darwin-x64' }}
+        shell: bash
+        run: |
+          node -e "const h=require('node-hid'); console.log('node-hid loaded; devices=', h.devices().length)" || {
+            echo 'node-hid failed to load after rebuild' >&2
+            exit 1
+          }
+
+      - name: Compile TypeScript
+        run: npm run compile
 
       - name: Prune dev dependencies
-        run: npm prune --production
+        run: |
+          npm prune --omit=dev --ignore-scripts
+          npm pkg set scripts.vscode:prepublish="echo already compiled"
 
       - name: Package extension
-        run: npx @vscode/vsce package --target ${{ matrix.target }} --no-dependencies
+        run: npx --yes @vscode/vsce package --target ${{ matrix.target }} --no-dependencies
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
