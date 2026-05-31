@@ -1,8 +1,9 @@
 .vscode/**
 .vscode-test/**
+.github/**
 out/**/*.js.map
 src/**
+docs/**
+csv-examples/**
 .gitignore
 tsconfig.json
-node_modules/**
-!node_modules/jsonc-parser/**

@@ -49,8 +49,11 @@ jobs:
       - name: Rebuild native modules for VS Code Electron
         run: npx @electron/rebuild -w node-hid -v ${{ steps.electron.outputs.version }}
 
+      - name: Prune dev dependencies
+        run: npm prune --production
+
       - name: Package extension
-        run: npx @vscode/vsce package --target ${{ matrix.target }}
+        run: npx @vscode/vsce package --target ${{ matrix.target }} --no-dependencies
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
