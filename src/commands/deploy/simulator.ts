@@ -71,7 +71,23 @@ async function syncFromManifest(
                 } catch { /* already gone */ }
             }
         }
-    } catch { /* no existing manifest, nothing to delete */ }
+    } catch {
+        // No existing manifest — delete all files currently in destAppPath
+        try {
+            const destEntries = await fs.readdir(destAppPath, { recursive: true, encoding: 'utf8' });
+            for (const rel of destEntries) {
+                const destFile = path.join(destAppPath, rel);
+                try {
+                    const stat = await fs.stat(destFile);
+                    if (stat.isFile()) {
+                        await fs.unlink(destFile);
+                        channel.appendLine(`  deleted: ${rel}`);
+                        deletedCount++;
+                    }
+                } catch { /* already gone */ }
+            }
+        } catch { /* destAppPath did not exist yet, nothing to clean */ }
+    }
 
     // --- Copy files listed in source manifest ---
     let copiedCount = 0;
