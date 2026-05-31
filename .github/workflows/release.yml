@@ -95,16 +95,6 @@ jobs:
         if: steps.selection.outputs.should_run == 'true'
         run: npm ci --ignore-scripts
 
-      # Linux-only workaround: node-hid@3.3.0 pulls an old node-addon-api
-      # via lockfile. Newer VS Code Electron headers can fail to compile with
-      # that version, so refresh node-addon-api only for Linux packaging.
-      - name: Linux workaround for node-addon-api
-        if: steps.selection.outputs.should_run == 'true' && runner.os == 'Linux'
-        shell: bash
-        run: |
-          npm install --no-save --no-package-lock --ignore-scripts node-addon-api@^8
-          node -p "'node-addon-api=' + require('./node_modules/node-addon-api/package.json').version"
-
       - name: Resolve VS Code Electron version
         if: steps.selection.outputs.should_run == 'true'
         id: electron

@@ -166,6 +166,9 @@
   "dependencies": {
     "node-hid": "^3.3.0"
   },
+  "overrides": {
+    "node-addon-api": "^8.5.0"
+  },
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
     "@types/node": "18.x",
