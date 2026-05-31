@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { fork, exec } from 'child_process';
-import type { EthosMeta, DeployConfig } from './types';
+import type { EthosMeta, DeployConfig, DeployStep } from './types';
 import { simulatorTarget } from './simulator';
 import { radioTarget } from './radio';
 
@@ -15,9 +15,17 @@ function getOutputChannel(): vscode.OutputChannel {
     return deployOutputChannel;
 }
 
+/** Normalize a step entry to a DeployStep object. */
+function normalizeStep(step: string | DeployStep): DeployStep {
+    if (typeof step === 'string') {
+        return { script: step.trim() };
+    }
+    return { ...step, script: step.script.trim() };
+}
+
 /** Run a single post-deploy step. Returns exit code. */
 function runStep(
-    step: string,
+    step: string | DeployStep,
     workspaceRoot: string,
     sourcePath: string,
     destPath: string,
@@ -25,24 +33,28 @@ function runStep(
     channel: vscode.OutputChannel
 ): Promise<number> {
     return new Promise((resolve) => {
-        const env = { ...process.env, DEST_PATH: destPath, SOURCE_PATH: sourcePath, WORKSPACE_ROOT: workspaceRoot, DEPLOY_TARGET: target };
-        const trimmed = step.trim();
+        const normalized = normalizeStep(step);
+        const baseEnv = { ...process.env, DEST_PATH: destPath, SOURCE_PATH: sourcePath, WORKSPACE_ROOT: workspaceRoot, DEPLOY_TARGET: target };
+        const env = normalized.env ? { ...baseEnv, ...normalized.env } : baseEnv;
+        const script = normalized.script;
 
         // Detect .js / .mjs scripts (first token ends with .js or .mjs)
-        const firstToken = trimmed.split(/\s+/)[0];
+        const firstToken = script.split(/\s+/)[0];
         const isNode = /\.(m?js)$/i.test(firstToken);
 
         if (isNode) {
             const scriptPath = path.isAbsolute(firstToken)
                 ? firstToken
                 : path.join(workspaceRoot, firstToken);
-            const child = fork(scriptPath, [], { cwd: workspaceRoot, env, silent: true });
+            const args = normalized.args ?? [];
+            const child = fork(scriptPath, args, { cwd: workspaceRoot, env, silent: true });
             child.stdout?.on('data', (d: Buffer) => channel.append(d.toString()));
             child.stderr?.on('data', (d: Buffer) => channel.append(d.toString()));
             child.on('close', (code: number | null) => resolve(code ?? 1));
         } else {
             // Substitute ${destPath} and ${sourcePath} literals
-            const cmd = trimmed
+            const args = normalized.args ?? [];
+            const cmd = [script, ...args].join(' ')
                 .replace(/\$\{destPath\}/g, destPath)
                 .replace(/\$\{sourcePath\}/g, sourcePath);
             const child = exec(cmd, { cwd: workspaceRoot, env });
@@ -146,7 +158,8 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
 
             // --- Post-deploy steps ---
             for (const step of steps) {
-                channel.appendLine(`\n  > ${step}`);
+                const label = typeof step === 'string' ? step : JSON.stringify(step);
+                channel.appendLine(`\n  > ${label}`);
                 const code = await runStep(step, workspaceRoot, sourcePath, destAppPath, target, channel);
                 if (code !== 0) {
                     channel.appendLine(`  step failed with exit code ${code}, aborting remaining steps.`);

@@ -2,7 +2,7 @@
   "name": "ethos-vscode-extension",
   "displayName": "Ethos VSCode Extension",
   "description": "Telemetry replay for the Ethos Simulator",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
@@ -47,9 +47,37 @@
             },
             "steps": {
               "type": "array",
-              "items": { "type": "string" },
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "description": "A .js/.mjs path (run via Node fork) or a shell command (run via exec). Use ${destPath} and ${sourcePath} as substitution variables."
+                  },
+                  {
+                    "type": "object",
+                    "required": ["script"],
+                    "properties": {
+                      "script": {
+                        "type": "string",
+                        "description": "A .js/.mjs path or shell command."
+                      },
+                      "args": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "Additional arguments passed to fork() for .mjs scripts, or appended to the command for exec."
+                      },
+                      "env": {
+                        "type": "object",
+                        "additionalProperties": { "type": "string" },
+                        "description": "Extra environment variables merged into the step's environment."
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
+              },
               "default": [],
-              "description": "Post-deploy commands. .js/.mjs paths are run with Node fork(); everything else via exec(). Use ${destPath} and ${sourcePath} as substitution variables."
+              "description": "Post-deploy commands. Each item is a string or an object with script, args, and env."
             }
           }
         }

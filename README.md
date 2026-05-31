@@ -79,7 +79,7 @@ Configure the command via `ethosExt.deploy` in your workspace settings:
 |---|---|---|---|
 | `app` | `string` | — | **Required.** Workspace-relative path to the source app folder. |
 | `manifest` | `string` | `""` | Workspace-relative path to the Ethos Lua manifest file. If set to a non-empty string, only files listed in the manifest are copied (manifest mode). If empty, all files are copied recursively. |
-| `steps` | `string[]` | `[]` | Post-deploy commands run sequentially after the copy. See [Post-deploy steps](#post-deploy-steps). |
+| `steps` | `(string \| object)[]` | `[]` | Post-deploy commands run sequentially after the copy. See [Post-deploy steps](#post-deploy-steps). |
 
 The command also reads the following settings from the `bsongis.ethos` extension:
 
@@ -115,33 +115,57 @@ Manifest mode activates when `ethosExt.deploy.manifest` is set to a non-empty st
 
 ### Post-deploy steps
 
-Each entry in `steps` is run after the copy completes. The extension substitutes two variables:
+Each entry in `steps` is either a **string** or an **object**. Steps run sequentially after the copy; a non-zero exit code aborts remaining steps and shows an error notification. All stdout/stderr is streamed to the **Ethos Deploy** output channel.
+
+The following environment variables are set for every step process:
 
 | Variable | Value |
 |---|---|
-| `${destPath}` | Absolute path to the destination app folder |
-| `${sourcePath}` | Absolute path to the source app folder |
+| `DEST_PATH` | Absolute path to the destination app folder |
+| `SOURCE_PATH` | Absolute path to the source app folder |
+| `WORKSPACE_ROOT` | Absolute path to the workspace root |
+| `DEPLOY_TARGET` | `"simulator"` or `"radio"` |
 
-The paths are also passed as environment variables `DEST_PATH` and `SOURCE_PATH` to every step process.
+The string substitution variables `${destPath}` and `${sourcePath}` are also expanded in string steps and object `script` values run via exec.
 
-**Shell commands** (default) — run via `exec()` with the workspace root as the working directory:
+#### String step
+
+A plain string is either a `.js`/`.mjs` path (run via `fork()`) or a shell command (run via `exec()`). Detection is based on the first token ending in `.js` or `.mjs`.
 
 ```json
 "steps": [
+    "docs/deploy-themes.mjs",
     ".venv/bin/python scripts/post-deploy.py",
     "echo Done: ${destPath}"
 ]
 ```
 
-**Node.js scripts** — any entry whose first token ends in `.js` or `.mjs` is run via `fork()`:
+#### Object step
+
+An object step gives you full control over the script, arguments, and extra environment variables:
 
 ```json
 "steps": [
-    "scripts/post-deploy.mjs"
+    {
+        "script": "docs/deploy-themes.mjs",
+        "args": ["/path/to/EFC-themes/lua/themes"],
+        "env": { "ETHOS_VERSION": "26.0" }
+    }
 ]
 ```
 
-All stdout/stderr is streamed to the **Ethos Deploy** output channel. A non-zero exit code aborts the remaining steps and shows an error notification.
+| Property | Type | Description |
+|---|---|---|
+| `script` | `string` | **Required.** A `.js`/`.mjs` path or a shell command. |
+| `args` | `string[]` | Extra arguments. Passed to `fork()` for Node scripts; appended to the command string for exec. |
+| `env` | `object` | Extra environment variables merged on top of the base env for this step only. |
+
+#### Bundled post-deploy scripts
+
+| Script | Description |
+|---|---|
+| [`docs/deploy-sensors.mjs`](./docs/deploy-sensors.mjs) | Copies `.vscode/sensors.json` to the simulator root (skipped if already present, skipped on radio target). |
+| [`docs/deploy-themes.mjs`](./docs/deploy-themes.mjs) | Mirrors `theme-*` directories from a sibling `EFC-themes` repo into the simulator's `scripts/` directory. Skipped when `ETHOS_VERSION` major < 26. The source directory can be overridden via `args[0]` or the `ETHOS_THEMES_DIR` env var. |
 
 ## ethos-menu.json
 

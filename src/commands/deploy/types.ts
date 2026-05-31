@@ -4,10 +4,16 @@ export interface EthosMeta {
     files: string[];
 }
 
+export interface DeployStep {
+    script: string;
+    args?: string[];
+    env?: Record<string, string>;
+}
+
 export interface DeployConfig {
     app?: string;
     manifest?: string;
-    steps?: string[];
+    steps?: (string | DeployStep)[];
 }
 
 export interface DeployTarget {
