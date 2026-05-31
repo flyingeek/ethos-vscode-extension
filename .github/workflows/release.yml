@@ -55,15 +55,20 @@ jobs:
       - name: Resolve VS Code Electron version
         id: electron
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          TAG=$(curl -fsSL https://api.github.com/repos/microsoft/vscode/releases/latest \
-            | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).tag_name))")
-          VERSION=$(curl -fsSL "https://raw.githubusercontent.com/microsoft/vscode/${TAG}/package.json" \
+          # Use VS Code's public update API (no auth, no rate limit) to get the
+          # latest stable commit, then read electron from that commit's package.json.
+          COMMIT=$(curl -fsSL "https://update.code.visualstudio.com/api/update/darwin/stable/latest" \
+            | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).version))")
+          echo "VS Code stable commit: $COMMIT"
+          VERSION=$(curl -fsSL "https://raw.githubusercontent.com/microsoft/vscode/${COMMIT}/package.json" \
             | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).devDependencies.electron.replace(/^\D+/,'')))")
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "VS Code stable: $TAG -> Electron $VERSION"
+          echo "Electron version: $VERSION"
 
       - name: Cache electron headers
         uses: actions/cache@v4
