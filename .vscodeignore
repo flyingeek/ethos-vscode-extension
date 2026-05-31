@@ -7,3 +7,10 @@ docs/**
 csv-examples/**
 .gitignore
 tsconfig.json
+
+# Bundle node-hid (native addon) and its transitive runtime deps;
+# exclude everything else in node_modules.
+node_modules/**
+!node_modules/node-hid/**
+!node_modules/node-addon-api/**
+!node_modules/pkg-prebuilds/**
