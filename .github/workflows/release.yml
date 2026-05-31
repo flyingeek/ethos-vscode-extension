@@ -37,8 +37,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Resolve VS Code Electron version
+        id: electron
+        shell: bash
+        run: |
+          VERSION=$(curl -fsSL https://raw.githubusercontent.com/microsoft/vscode/main/.yarnrc \
+            | grep -m1 '^target ' | tr -d '"' | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Rebuild native modules for VS Code Electron
-        run: npx @electron/rebuild -w node-hid
+        run: npx @electron/rebuild -w node-hid -v ${{ steps.electron.outputs.version }}
 
       - name: Package extension
         run: npx @vscode/vsce package --target ${{ matrix.target }}
