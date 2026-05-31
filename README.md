@@ -164,6 +164,10 @@ To integrate with the Ethos extension's menu, add entries to your project's `eth
     {
         "label": "📻 Deploy to radio",
         "command": "ethosExt.deployRadio"
-    }
+    },
+    {
+        "label": "$(debug-start)Deploy & Launch SIM",
+        "command": ["ethos.stop", "ethos.clearLogfile", "ethosExt.deploySimulator", "ethos.start"]
+    },
 ]
 ```
