@@ -16,8 +16,8 @@ jobs:
             target: darwin-x64
           - os: windows-latest
             target: win32-x64
-          - os: ubuntu-latest
-            target: linux-x64
+          # - os: ubuntu-latest
+          #   target: linux-x64
 
     runs-on: ${{ matrix.os }}
 
@@ -31,8 +31,10 @@ jobs:
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Install Linux native dependencies
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y libudev-dev libusb-1.0-0-dev
+        # if: runner.os == 'Linux'
+        # run: sudo apt-get install -y libudev-dev libusb-1.0-0-dev
+        if: false
+        run: echo 'Linux skipped'
 
       - name: Install dependencies
         run: npm ci
