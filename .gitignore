@@ -4,3 +4,6 @@ out/
 .vscode-test/
 .vscode/scripts
 /ethos_lua_manifest.*
+ethos debug.txt
+.vscode/radio-usb-reference.md
+ethos debug usb.txt
