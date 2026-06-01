@@ -8,7 +8,7 @@ It adds those commands to VS Code:
 - **Ethos: Stop Telemetry** — stop the current telemetry playback and clear the pinned status label
 - **Ethos: Set Telemetry Value** — pick a sensor frame by name and inject a single value into the running simulator
 - **Ethos: Deploy to Simulator** — copy a Lua app folder from the workspace into the Ethos simulator's scripts directory, with optional manifest-driven selective copy and post-deploy steps
-- **Ethos: Deploy to Radio** — deploy a Lua app folder to a connected radio (not yet implemented)
+- **Ethos: Deploy to Radio** — deploy a Lua app folder to a connected radio. The radio can be connected in `Ethos Suite` or `Serial` mode.
 - **Ethos: Debug Connection** — collect a USB/HID/serial/volume diagnostic snapshot of a connected radio and display it in the **Ethos Debug Connection** output channel
 
 The extension is only activated in workspaces where the [bsongis.ethos](https://marketplace.visualstudio.com/items?itemName=bsongis.ethos) extension is active. It requires `bsongis.ethos` to be installed.
@@ -21,6 +21,14 @@ The extension is only activated in workspaces where the [bsongis.ethos](https://
 |---|---|---|
 | `ethosExt.telemetryCustomSpeed` | `number` | Optional custom replay speed multiplier for telemetry playback. If set, it will appear as an option in the speed picker during playback. |
 | `ethosExt.deploy` | `object` | Configuration for **Ethos: Deploy to Simulator** and **Ethos: Deploy to Radio** (see below). |
+
+For Deploy to work, the minimum settings to add is:
+
+```json
+"ethosExt.deploy": {
+    "app": "appname",
+}
+```
 
 ## Telemetry Playback
 
@@ -52,17 +60,28 @@ The simulator is updated immediately. The command requires the Ethos simulator t
 
 ## Deploy
 
-**Ethos: Deploy to Simulator** (`ethosExt.deploySimulator`) copies a Lua app folder from your workspace into the correct simulator scripts directory. **Ethos: Deploy to Radio** (`ethosExt.deployRadio`) is not yet implemented.
+**Ethos: Deploy to Simulator** (`ethosExt.deploySimulator`) copies a Lua app folder from your workspace into the correct simulator scripts directory. **Ethos: Deploy to Radio** (`ethosExt.deployRadio`).
 
 ### Destination path
 
-```
+#### Simulator
+
+```text
 <ethos.simulatorsFolder>/<ethos.board>_<ethos.protocol>@<ethos.release>/scripts/<appname>
 ```
 
+#### Radio
+
+```text
+RADIO:/scripts/<appname>
+```
+
 `<appname>` is:
+
 - `manifest.folder` when `ethosExt.deploy.manifest` is set to a non-empty string
 - `path.basename(ethosExt.deploy.app)` otherwise
+
+RADIO: is the first available storage key (`sdcard` or `radio`) containing a scripts folder on the connected radio.
 
 ### Configuration
 
@@ -70,7 +89,7 @@ Configure the command via `ethosExt.deploy` in your workspace settings:
 
 ```json
 "ethosExt.deploy": {
-    "app": "src/gps-qrcode",
+    "app": "gps-qrcode",
     "manifest": "ethos_lua_manifest.json",
     "stageSteps": [],
     "steps": []
@@ -94,8 +113,9 @@ The command also reads the following settings from the `bsongis.ethos` extension
 | `ethos.release` | Ethos release identifier (e.g. `1.7.2`). |
 
 ### Manifest mode
+Manifest mode is an attempt to match the behavior of Ethos Suite 1.7.2's "Lua App Manifest" feature, it has some limitations due to the differences in the deployment process. Manifest mode activates when `ethosExt.deploy.manifest` is set to a non-empty string.
 
-Manifest mode activates when `ethosExt.deploy.manifest` is set to a non-empty string. It uses an [`ethos_lua_manifest.json`](./ethos_lua_manifest.json) file:
+It uses an [`ethos_lua_manifest.json`](./ethos_lua_manifest.json) file:
 
 ```json
 {
@@ -117,6 +137,8 @@ Manifest mode activates when `ethosExt.deploy.manifest` is set to a non-empty st
 - Errors: the command aborts if the manifest is unreadable or `manifestVersion` is not `1`.
 
 ### Deploy steps
+
+Deploy steps are custom scripts that run before or after the copy process. They can be used for extra processing, validation, or cleanup.
 
 Each entry in `stageSteps` or `steps` is either a **string** or an **object**. A non-zero exit code aborts remaining steps and shows an error notification. All stdout/stderr is streamed to the **Ethos Deploy** output channel.
 
