@@ -28,6 +28,25 @@ function normalizeStep(step: string | DeployStep): DeployStep {
     return { ...step, script: step.script.trim() };
 }
 
+/** Resolve VS Code-style variable substitutions in a string.
+ * Supports ${workspaceFolder}, ${workspaceRoot}, and ${config:section.key}.
+ * Unknown config values are substituted with an empty string.
+ */
+function resolveVariables(value: string, workspaceRoot: string): string {
+    return value
+        .replace(/\$\{workspaceFolder\}/g, workspaceRoot)
+        .replace(/\$\{workspaceRoot\}/g, workspaceRoot)
+        .replace(/\$\{config:([^}]+)\}/g, (_match, key: string) => {
+            const dotIndex = key.indexOf('.');
+            if (dotIndex === -1) {
+                return vscode.workspace.getConfiguration().get<string>(key) ?? '';
+            }
+            const section = key.substring(0, dotIndex);
+            const name = key.substring(dotIndex + 1);
+            return vscode.workspace.getConfiguration(section).get<string>(name) ?? '';
+        });
+}
+
 /** Run a single post-deploy step. Returns exit code. */
 function runStep(
     step: string | DeployStep,
@@ -39,8 +58,12 @@ function runStep(
 ): Promise<number> {
     return new Promise((resolve) => {
         const normalized = normalizeStep(step);
+        const resolvedArgs = (normalized.args ?? []).map(a => resolveVariables(a, workspaceRoot));
+        const resolvedEnvOverrides = normalized.env
+            ? Object.fromEntries(Object.entries(normalized.env).map(([k, v]) => [k, resolveVariables(v, workspaceRoot)]))
+            : undefined;
         const baseEnv = { ...process.env, DEST_PATH: destPath, SOURCE_PATH: sourcePath, WORKSPACE_ROOT: workspaceRoot, DEPLOY_TARGET: target };
-        const env = normalized.env ? { ...baseEnv, ...normalized.env } : baseEnv;
+        const env = resolvedEnvOverrides ? { ...baseEnv, ...resolvedEnvOverrides } : baseEnv;
         const script = normalized.script;
 
         // Detect .js / .mjs scripts (first token ends with .js or .mjs)
@@ -51,15 +74,13 @@ function runStep(
             const scriptPath = path.isAbsolute(firstToken)
                 ? firstToken
                 : path.join(workspaceRoot, firstToken);
-            const args = normalized.args ?? [];
-            const child = fork(scriptPath, args, { cwd: workspaceRoot, env, silent: true });
+            const child = fork(scriptPath, resolvedArgs, { cwd: workspaceRoot, env, silent: true });
             child.stdout?.on('data', (d: Buffer) => channel.append(d.toString()));
             child.stderr?.on('data', (d: Buffer) => channel.append(d.toString()));
             child.on('close', (code: number | null) => resolve(code ?? 1));
         } else {
             // Substitute ${destPath} and ${sourcePath} literals
-            const args = normalized.args ?? [];
-            const cmd = [script, ...args].join(' ')
+            const cmd = [script, ...resolvedArgs].join(' ')
                 .replace(/\$\{destPath\}/g, destPath)
                 .replace(/\$\{sourcePath\}/g, sourcePath);
             const child = exec(cmd, { cwd: workspaceRoot, env });

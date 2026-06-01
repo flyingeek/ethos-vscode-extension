@@ -136,7 +136,19 @@ The following environment variables are set for every step process:
 | `WORKSPACE_ROOT` | Absolute path to the workspace root |
 | `DEPLOY_TARGET` | `"simulator"`, `"radio"`, `"radio-lua"`, or `"radio-fast"` |
 
-The string substitution variables `${destPath}` and `${sourcePath}` are also expanded in string steps and object `script` values run via exec.
+#### Variable substitution
+
+The following variables are expanded at step execution time:
+
+| Variable | Expands to | Where |
+|---|---|---|
+| `${destPath}` | Absolute path to the destination app folder | `script` (exec), `args` |
+| `${sourcePath}` | Absolute path to the source app folder | `script` (exec), `args` |
+| `${workspaceFolder}` | Absolute path to the workspace root | `args`, `env` values |
+| `${workspaceRoot}` | Same as `${workspaceFolder}` (deprecated alias) | `args`, `env` values |
+| `${config:section.key}` | Value of a VS Code setting (e.g. `${config:python.defaultInterpreterPath}`) | `args`, `env` values |
+
+Unknown `${config:…}` keys resolve to an empty string.
 
 #### String step
 
@@ -167,8 +179,8 @@ An object step gives you full control over the script, arguments, and extra envi
 | Property | Type | Description |
 |---|---|---|
 | `script` | `string` | **Required.** A `.js`/`.mjs` path or a shell command. |
-| `args` | `string[]` | Extra arguments. Passed to `fork()` for Node scripts; appended to the command string for exec. |
-| `env` | `object` | Extra environment variables merged on top of the base env for this step only. |
+| `args` | `string[]` | Extra arguments. Passed to `fork()` for Node scripts; appended to the command string for exec. Supports [variable substitution](#variable-substitution). |
+| `env` | `object` | Extra environment variables merged on top of the base env for this step only. Values support [variable substitution](#variable-substitution). |
 
 #### Bundled post-deploy scripts
 
