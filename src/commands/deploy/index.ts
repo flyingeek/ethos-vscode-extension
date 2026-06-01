@@ -54,7 +54,8 @@ function runStep(
     sourcePath: string,
     destPath: string,
     target: string,
-    channel: vscode.OutputChannel
+    channel: vscode.OutputChannel,
+    pythonInterpreterPath: string
 ): Promise<number> {
     return new Promise((resolve) => {
         const normalized = normalizeStep(step);
@@ -80,9 +81,10 @@ function runStep(
             child.on('close', (code: number | null) => resolve(code ?? 1));
         } else {
             // Substitute ${destPath} and ${sourcePath} literals
-            const cmd = [script, ...resolvedArgs].join(' ')
+            const cmd = [script.replace(/\$\{pythonInterpreterPath\}/g, pythonInterpreterPath), ...resolvedArgs].join(' ')
                 .replace(/\$\{destPath\}/g, destPath)
                 .replace(/\$\{sourcePath\}/g, sourcePath);
+            channel.appendLine(`  > command: ${cmd}\n`);
             const child = exec(cmd, { cwd: workspaceRoot, env });
             child.stdout?.on('data', (d: Buffer) => channel.append(d.toString()));
             child.stderr?.on('data', (d: Buffer) => channel.append(d.toString()));
@@ -99,10 +101,15 @@ async function runSteps(
     target: string,
     channel: vscode.OutputChannel
 ): Promise<number> {
+    let defaultPythonInterpreterPath = vscode.workspace.getConfiguration('python').get<string>('defaultInterpreterPath') ?? 'python';
+    let pythonInterpreterPath = defaultPythonInterpreterPath;
+    try {
+        pythonInterpreterPath = await vscode.commands.executeCommand<string>('python.interpreterPath', vscode.Uri.file(workspaceRoot)) ?? defaultPythonInterpreterPath;
+    } catch { /* Python extension not available */ }
     for (const step of steps) {
         const label = typeof step === 'string' ? step : JSON.stringify(step);
-        channel.appendLine(`\n  > ${label}`);
-        const code = await runStep(step, workspaceRoot, sourcePath, destPath, target, channel);
+        channel.appendLine(`\n  > ${label.replace(/\$\{pythonInterpreterPath\}/g, pythonInterpreterPath)}`);
+        const code = await runStep(step, workspaceRoot, sourcePath, destPath, target, channel, pythonInterpreterPath);
         if (code !== 0) {
             return code;
         }

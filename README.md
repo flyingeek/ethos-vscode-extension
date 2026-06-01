@@ -142,6 +142,7 @@ The following variables are expanded at step execution time:
 
 | Variable | Expands to | Where |
 |---|---|---|
+| `${pythonInterpreterPath}` | The resolved Python interpreter path from the Python extension, or `python.defaultInterpreterPath` or `python` if the Python extension is not available or fails to resolve. it. | `script` (exec) |
 | `${destPath}` | Absolute path to the destination app folder | `script` (exec), `args` |
 | `${sourcePath}` | Absolute path to the source app folder | `script` (exec), `args` |
 | `${workspaceFolder}` | Absolute path to the workspace root | `args`, `env` values |
