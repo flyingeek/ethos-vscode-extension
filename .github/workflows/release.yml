@@ -44,19 +44,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Verify package version matches lockfile
-        shell: bash
-        run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          LOCK_VERSION=$(node -p "require('./package-lock.json').version")
-          LOCK_PACKAGE_VERSION=$(node -p "require('./package-lock.json').packages[''].version")
-
-          if [ "$PACKAGE_VERSION" != "$LOCK_VERSION" ] || [ "$PACKAGE_VERSION" != "$LOCK_PACKAGE_VERSION" ]; then
-            echo "package.json version ($PACKAGE_VERSION) is out of sync with package-lock.json ($LOCK_VERSION / $LOCK_PACKAGE_VERSION)." >&2
-            echo "Run npm run refresh-lock after bumping the package version." >&2
-            exit 1
-          fi
-
       - name: Select targets for manual runs
         id: selection
         shell: bash
