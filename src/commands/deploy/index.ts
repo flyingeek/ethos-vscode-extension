@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
+import * as os from 'os';
 import * as path from 'path';
 import { fork, exec } from 'child_process';
 import type { EthosMeta, DeployConfig, DeployStep, DeployTarget } from './types';
@@ -13,6 +14,10 @@ function getOutputChannel(): vscode.OutputChannel {
         deployOutputChannel = vscode.window.createOutputChannel('Ethos Deploy');
     }
     return deployOutputChannel;
+}
+
+function isRadioTarget(target: string): boolean {
+    return target === 'radio' || target === 'radio-lua' || target === 'radio-fast';
 }
 
 /** Normalize a step entry to a DeployStep object. */
@@ -65,6 +70,77 @@ function runStep(
     });
 }
 
+async function runSteps(
+    steps: (string | DeployStep)[],
+    workspaceRoot: string,
+    sourcePath: string,
+    destPath: string,
+    target: string,
+    channel: vscode.OutputChannel
+): Promise<number> {
+    for (const step of steps) {
+        const label = typeof step === 'string' ? step : JSON.stringify(step);
+        channel.appendLine(`\n  > ${label}`);
+        const code = await runStep(step, workspaceRoot, sourcePath, destPath, target, channel);
+        if (code !== 0) {
+            return code;
+        }
+    }
+
+    return 0;
+}
+
+async function copyDirectory(sourceDir: string, destDir: string): Promise<void> {
+    await fs.mkdir(destDir, { recursive: true });
+    const entries = await fs.readdir(sourceDir, { recursive: true, encoding: 'utf8' });
+
+    for (const rel of entries) {
+        const sourceEntry = path.join(sourceDir, rel);
+        const destEntry = path.join(destDir, rel);
+        const stat = await fs.stat(sourceEntry);
+
+        if (stat.isDirectory()) {
+            await fs.mkdir(destEntry, { recursive: true });
+            continue;
+        }
+
+        if (!stat.isFile()) {
+            continue;
+        }
+
+        await fs.mkdir(path.dirname(destEntry), { recursive: true });
+        await fs.copyFile(sourceEntry, destEntry);
+    }
+}
+
+async function stageSourceForDeploy(
+    sourcePath: string,
+    appname: string,
+    channel: vscode.OutputChannel
+): Promise<{ stageRoot: string; stagedSourcePath: string }> {
+    const stageRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'ethos-deploy-'));
+    const stagedSourcePath = path.join(stageRoot, appname);
+
+    channel.appendLine(`[stage] Creating temp staging directory: ${stageRoot}`);
+    await copyDirectory(sourcePath, stagedSourcePath);
+    channel.appendLine(`[stage] Source staged at: ${stagedSourcePath}`);
+
+    return { stageRoot, stagedSourcePath };
+}
+
+async function cleanupStaging(stageRoot: string | undefined, channel: vscode.OutputChannel): Promise<void> {
+    if (!stageRoot) {
+        return;
+    }
+
+    try {
+        await fs.rm(stageRoot, { recursive: true, force: true });
+        channel.appendLine(`[stage] Removed temp staging directory: ${stageRoot}`);
+    } catch (error) {
+        channel.appendLine(`[stage] Warning: could not remove temp staging directory "${stageRoot}": ${error}`);
+    }
+}
+
 export async function deployCommand(target: string = 'simulator'): Promise<void> {
     // --- Read ethosExt.deploy config ---
     const extConfig = vscode.workspace.getConfiguration('ethosExt');
@@ -78,7 +154,9 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
 
     const manifestConfig = deployConfig.manifest ?? '';
     const useManifest = manifestConfig.trim() !== '';
+    const stageSteps = deployConfig.stageSteps ?? [];
     const steps = deployConfig.steps ?? [];
+    const shouldStage = stageSteps.length > 0;
 
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspaceRoot) {
@@ -137,46 +215,80 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
     }
 
     const channel = getOutputChannel();
-
-    // --- Dispatch to target ---
+    let effectiveSourcePath = sourcePath;
+    let stageRoot: string | undefined;
+    let didDeploy = false;
     let result: DeployTarget | undefined;
-    if (target === 'radio' || target === 'radio-lua' || target === 'radio-fast') {
-        result = await radioTarget(sourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel, target);
-    } else {
-        result = await simulatorTarget(sourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel);
-    }
-    if (!result) { return; }
-
-    const { destAppPath, destBase, deploy, finalize } = result;
 
     channel.show(true);
     channel.appendLine(`\n--- Ethos Deploy (${target}): ${new Date().toLocaleTimeString()} ---`);
     channel.appendLine(`  source  : ${sourcePath}`);
-    channel.appendLine(`  dest    : ${path.relative(destBase, destAppPath)}`);
     if (useManifest) { channel.appendLine(`  manifest: ${path.relative(workspaceRoot, manifestPath)}`); }
 
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: 'Ethos: Deploying…', cancellable: false },
         async () => {
-            await deploy();
+            let finalizeOnError: (() => Promise<void>) | undefined;
 
-            // --- Post-deploy steps (volume still mounted) ---
-            for (const step of steps) {
-                const label = typeof step === 'string' ? step : JSON.stringify(step);
-                channel.appendLine(`\n  > ${label}`);
-                const code = await runStep(step, workspaceRoot, sourcePath, destAppPath, target, channel);
-                if (code !== 0) {
-                    channel.appendLine(`  step failed with exit code ${code}, aborting remaining steps.`);
-                    vscode.window.showErrorMessage(`Ethos Deploy: step failed (exit ${code}). See "Ethos Deploy" output.`);
+            try {
+                if (shouldStage) {
+                    channel.appendLine('[stage] Preparing staged source…');
+                    const staged = await stageSourceForDeploy(sourcePath, appname, channel);
+                    stageRoot = staged.stageRoot;
+                    effectiveSourcePath = staged.stagedSourcePath;
+                    channel.appendLine(`  stage   : ${effectiveSourcePath}`);
+
+                    const stageCode = await runSteps(stageSteps, workspaceRoot, sourcePath, effectiveSourcePath, target, channel);
+                    if (stageCode !== 0) {
+                        channel.appendLine(`  step failed with exit code ${stageCode}, aborting before copy.`);
+                        vscode.window.showErrorMessage(`Ethos Deploy: step failed (exit ${stageCode}). See "Ethos Deploy" output.`);
+                        return;
+                    }
+                }
+
+                if (isRadioTarget(target)) {
+                    result = await radioTarget(effectiveSourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel, target);
+                } else {
+                    result = await simulatorTarget(effectiveSourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel);
+                }
+                if (!result) {
+                    return;
+                }
+
+                const { destAppPath, destBase, deploy, finalize } = result;
+                finalizeOnError = finalize;
+
+                channel.appendLine(`  dest    : ${path.relative(destBase, destAppPath)}`);
+
+                await deploy();
+
+                const stepCode = await runSteps(steps, workspaceRoot, sourcePath, destAppPath, target, channel);
+                if (stepCode !== 0) {
+                    channel.appendLine(`  step failed with exit code ${stepCode}, aborting remaining steps.`);
+                    vscode.window.showErrorMessage(`Ethos Deploy: step failed (exit ${stepCode}). See "Ethos Deploy" output.`);
                     await finalize?.();
                     return;
                 }
-            }
 
-            // --- Unmount + close HID after steps have finished ---
-            await finalize?.();
+                await finalize?.();
+                didDeploy = true;
+            } catch (error) {
+                vscode.window.showErrorMessage(`Ethos Deploy: ${error}`);
+
+                if (finalizeOnError) {
+                    try {
+                        await finalizeOnError();
+                    } catch (finalizeError) {
+                        channel.appendLine(`[radio] Warning: finalize after failure also failed: ${finalizeError}`);
+                    }
+                }
+            } finally {
+                await cleanupStaging(stageRoot, channel);
+            }
         }
     );
 
-    vscode.window.showInformationMessage(`Ethos: Deployed to ${path.relative(destBase, destAppPath)}`);
+    if (didDeploy && result) {
+        vscode.window.showInformationMessage(`Ethos: Deployed to ${path.relative(result.destBase, result.destAppPath)}`);
+    }
 }

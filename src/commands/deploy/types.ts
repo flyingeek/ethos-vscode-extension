@@ -13,6 +13,7 @@ export interface DeployStep {
 export interface DeployConfig {
     app?: string;
     manifest?: string;
+    stageSteps?: (string | DeployStep)[];
     steps?: (string | DeployStep)[];
 }
 

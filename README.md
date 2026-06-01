@@ -72,6 +72,7 @@ Configure the command via `ethosExt.deploy` in your workspace settings:
 "ethosExt.deploy": {
     "app": "src/gps-qrcode",
     "manifest": "ethos_lua_manifest.json",
+    "stageSteps": [],
     "steps": []
 }
 ```
@@ -80,7 +81,8 @@ Configure the command via `ethosExt.deploy` in your workspace settings:
 |---|---|---|---|
 | `app` | `string` | — | **Required.** Workspace-relative path to the source app folder. |
 | `manifest` | `string` | `""` | Workspace-relative path to the Ethos Lua manifest file. If set to a non-empty string, only files listed in the manifest are copied (manifest mode). If empty, all files are copied recursively. |
-| `steps` | `(string \| object)[]` | `[]` | Post-deploy commands run sequentially after the copy. See [Post-deploy steps](#post-deploy-steps). |
+| `stageSteps` | `(string \| object)[]` | `[]` | Pre-copy deploy steps. When present, the source app is first copied to a temporary staging folder, these steps run against the staged app, and then the staged output is deployed. See [Deploy steps](#deploy-steps). |
+| `steps` | `(string \| object)[]` | `[]` | Post-copy deploy steps that run sequentially after files are copied to the final target folder. See [Deploy steps](#deploy-steps). |
 
 The command also reads the following settings from the `bsongis.ethos` extension:
 
@@ -114,18 +116,25 @@ Manifest mode activates when `ethosExt.deploy.manifest` is set to a non-empty st
 - If an existing manifest is found in the destination, all files it listed are deleted before copying.
 - Errors: the command aborts if the manifest is unreadable or `manifestVersion` is not `1`.
 
-### Post-deploy steps
+### Deploy steps
 
-Each entry in `steps` is either a **string** or an **object**. Steps run sequentially after the copy; a non-zero exit code aborts remaining steps and shows an error notification. All stdout/stderr is streamed to the **Ethos Deploy** output channel.
+Each entry in `stageSteps` or `steps` is either a **string** or an **object**. A non-zero exit code aborts remaining steps and shows an error notification. All stdout/stderr is streamed to the **Ethos Deploy** output channel.
+
+Timing depends on the step list:
+
+| Step list | When it runs | `DEST_PATH` |
+|---|---|---|
+| `stageSteps` | Before any simulator or radio copy | Temporary staged app folder |
+| `steps` | After files are copied to the final target | Final simulator or radio app folder |
 
 The following environment variables are set for every step process:
 
 | Variable | Value |
 |---|---|
-| `DEST_PATH` | Absolute path to the destination app folder |
+| `DEST_PATH` | Absolute path to the staged app folder for `stageSteps`, or the final deployed app folder for `steps` |
 | `SOURCE_PATH` | Absolute path to the source app folder |
 | `WORKSPACE_ROOT` | Absolute path to the workspace root |
-| `DEPLOY_TARGET` | `"simulator"` or `"radio"` |
+| `DEPLOY_TARGET` | `"simulator"`, `"radio"`, `"radio-lua"`, or `"radio-fast"` |
 
 The string substitution variables `${destPath}` and `${sourcePath}` are also expanded in string steps and object `script` values run via exec.
 
@@ -134,7 +143,7 @@ The string substitution variables `${destPath}` and `${sourcePath}` are also exp
 A plain string is either a `.js`/`.mjs` path (run via `fork()`) or a shell command (run via `exec()`). Detection is based on the first token ending in `.js` or `.mjs`.
 
 ```json
-"steps": [
+"stageSteps": [
     "docs/deploy-themes.mjs",
     ".venv/bin/python scripts/post-deploy.py",
     "echo Done: ${destPath}"
