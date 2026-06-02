@@ -189,6 +189,10 @@
       {
         "command": "ethosExt.radioDebug",
         "title": "Ethos: Radio Debug"
+      },
+     {
+        "command": "ethosExt.radioSerial",
+        "title": "Ethos: Radio Serial Console"
       }
     ]
   },

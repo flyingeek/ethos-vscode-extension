@@ -264,6 +264,10 @@ export async function switchToUsb(channel: vscode.OutputChannel): Promise<void> 
     }
 }
 
+export async function radioSerialConsoleCommand(): Promise<void> {
+    const config = getRadioConfig();
+    await tailSerialToChannel(config, getDeployChannel());
+}
 // ---------------------------------------------------------------------------
 // Quick pick command
 // ---------------------------------------------------------------------------

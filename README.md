@@ -9,6 +9,7 @@ It adds those commands to VS Code:
 - **Ethos: Set Telemetry Value** — pick a sensor frame by name and inject a single value into the running simulator
 - **Ethos: Deploy to Simulator** — copy a Lua app folder from the workspace into the Ethos simulator's scripts directory, with optional manifest-driven selective copy and post-deploy steps
 - **Ethos: Deploy to Radio** — deploy a Lua app folder to a connected radio. The radio can be connected in `Ethos Suite` or `Serial` mode.
+- **Ethos: Radio Serial Console** - Tail the radio's serial console output into the **Ethos Deploy** output channel. The radio must be connected in `Serial` mode for this to work.
 - **Ethos: Debug Connection** — collect a USB/HID/serial/volume diagnostic snapshot of a connected radio and display it in the **Ethos Debug Connection** output channel
 
 The extension is only activated in workspaces where the [bsongis.ethos](https://marketplace.visualstudio.com/items?itemName=bsongis.ethos) extension is active. It requires `bsongis.ethos` to be installed.

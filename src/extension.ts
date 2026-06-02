@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { playTelemetryCommand, stopTelemetry } from './commands/playTelemetry';
 import { setTelemetryCommand } from './commands/setTelemetry';
 import { deployCommand } from './commands/deploy';
-import { radioDebugCommand } from './commands/radioDebug';
+import { radioDebugCommand, radioSerialConsoleCommand } from './commands/radioDebug';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -14,6 +14,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('ethosExt.deployRadioLua',  () => deployCommand('radio-lua')),
     vscode.commands.registerCommand('ethosExt.deployRadioFast', () => deployCommand('radio-fast')),
     vscode.commands.registerCommand('ethosExt.radioDebug',      () => radioDebugCommand()),
+    vscode.commands.registerCommand('ethosExt.radioSerial',     () => radioSerialConsoleCommand()),
   );
 }
 

@@ -155,10 +155,14 @@ export async function tailSerialToChannel(
     if (process.platform === 'darwin' || process.platform === 'linux') {
         try {
             await execFileAsync('stty', ['-f', port, serialBaud.toString(), 'raw', 'cs8', '-cstopb', '-parenb'], { timeout: 3000 });
+            // Add delay after stty to allow device to stabilize (race condition fix)
+            await new Promise<void>(resolve => setTimeout(resolve, 200));
         } catch { /* stty may fail on some setups; proceed anyway */ }
     } else if (process.platform === 'win32') {
         try {
             await execFileAsync('mode', [port, `BAUD=${serialBaud}`, 'PARITY=N', 'DATA=8', 'STOP=1'], { timeout: 3000 });
+            // Add delay after mode to allow device to stabilize
+            await new Promise<void>(resolve => setTimeout(resolve, 200));
         } catch { /* best-effort */ }
     }
 
