@@ -18,6 +18,14 @@
       "problemMatcher": ["$tsc-watch"],
       "isBackground": true,
       "label": "npm: watch"
+    },
+    {
+      "type": "npm",
+      "script": "refresh-lock",
+      "group": "build",
+      "problemMatcher": [],
+      "isBackground": true,
+      "label": "npm: refresh-lock"
     }
   ]
 }
