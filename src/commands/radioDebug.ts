@@ -226,8 +226,7 @@ export async function switchToSerial(channel: vscode.OutputChannel): Promise<voi
         try {
             const existing = await scanDrives();
             if (Object.keys(existing).length > 0) {
-                channel.appendLine('[radio] Unmounting existing drives…');
-                await unmountDrives(existing);
+                await unmountDrives(existing, channel);
             }
             radio.startSerialMode();
         } finally {

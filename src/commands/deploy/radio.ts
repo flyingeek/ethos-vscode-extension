@@ -95,8 +95,7 @@ export async function radioTarget(
                     // State C: unmount any stale drives before switching mode
                     const stale = await scanDrives();
                     if (Object.keys(stale).length > 0) {
-                        channel.appendLine('[radio] Unmounting existing drives…');
-                        await unmountDrives(stale);
+                        await unmountDrives(stale, channel);
                     }
                 }
                 // stopSerialMode() (0x69) switches to USB mass-storage in both State B and C.
@@ -180,7 +179,7 @@ export async function radioTarget(
         channel.appendLine('[radio] Switching radio back to normal mode…');
 
         try {
-            await unmountDrives(drives);
+            await unmountDrives(drives, channel);
             // Wait until all volume paths are fully gone before the HID mode
             // switch — prevents the macOS "disk not ejected properly" alert.
             await waitForDrivesGone(drives, 8000);

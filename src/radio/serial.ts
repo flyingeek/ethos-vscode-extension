@@ -137,10 +137,10 @@ export async function tailSerialToChannel(
 
     // Port discovery with retries (mirrors the retry loop in tail_serial_debug)
     let port: string | undefined;
+    channel.appendLine(`[serial] Waiting up to ${retries * retryDelayMs / 1000}s for serial port…`);
     for (let i = 0; i < retries; i++) {
         port = await findSerialPort(nameHint, vidHex, pidHex);
         if (port) { break; }
-        channel.appendLine(`[serial] Waiting for serial port (${i + 1}/${retries})…`);
         await new Promise<void>(resolve => setTimeout(resolve, retryDelayMs));
     }
 
@@ -169,6 +169,10 @@ export async function tailSerialToChannel(
         try {
             fd = fs.createReadStream(port!, { flags: 'r' });
             let buf = '';
+
+            fd.on('open', () => {
+                channel.appendLine('[serial] Serial session started.');
+            });
 
             fd.on('data', (chunk: Buffer | string) => {
                 if (stopped) { fd?.destroy(); return; }
