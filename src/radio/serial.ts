@@ -16,6 +16,7 @@ import * as vscode from 'vscode';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import type { RadioConfig } from './hid';
+import { stripVTControlCharacters } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
@@ -184,7 +185,7 @@ export async function tailSerialToChannel(
                 const lines = buf.split(/\r?\n/);
                 buf = lines.pop() ?? '';
                 for (const line of lines) {
-                    channel.appendLine(line);
+                    channel.appendLine(stripVTControlCharacters(line));
                 }
             });
 
