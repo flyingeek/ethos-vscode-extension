@@ -34,6 +34,7 @@ fi
 
 if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
   echo "Tag \"$tag\" already exists locally"
+  echo "to delete: git tag -d \"$tag\" && git push --delete origin \"$tag\""
   exit 1
 fi
 
