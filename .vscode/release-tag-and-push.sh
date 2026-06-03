@@ -11,6 +11,8 @@ if [[ "$pkg_version" != "$lock_root_version" || "$pkg_version" != "$lock_pkg_ver
   npm run refresh-lock
   lock_root_version=$(node -p "const lock=require(\"./package-lock.json\"); lock.version || \"\"")
   lock_pkg_version=$(node -p "const lock=require(\"./package-lock.json\"); (lock.packages && lock.packages[\"\"] && lock.packages[\"\"].version) || \"\"")
+  echo "Commit the package-lock.json changes before running this script again."
+  exit 1
 fi
 
 if [[ "$pkg_version" != "$lock_root_version" || "$pkg_version" != "$lock_pkg_version" ]]; then
