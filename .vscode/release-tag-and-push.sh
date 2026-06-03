@@ -20,6 +20,12 @@ if [[ "$pkg_version" != "$lock_root_version" || "$pkg_version" != "$lock_pkg_ver
   exit 1
 fi
 
+if [[ -n $(git status --porcelain) ]]; then
+  echo "Git working tree is not clean. Please commit or stash changes before running this script."
+  git status --short
+  exit 1
+fi
+
 tag_input="${1:-release/<version>}"
 if [[ -z "${tag_input// }" || "$tag_input" == "release/<version>" ]]; then
   tag="release/$pkg_version"
