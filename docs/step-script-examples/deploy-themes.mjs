@@ -17,22 +17,22 @@
 import { cp, mkdir, readdir, stat } from 'fs/promises';
 import { join, dirname, resolve } from 'path';
 
-const DEFAULT_VERSION = 'nightly26';
-
-function shouldRun(version) {
-    if (!version || version === DEFAULT_VERSION) return true;
-    const major = parseInt(version.split('.')[0], 10);
-    return !isNaN(major) && major >= 26;
-}
-
 function debug(msg) {
     console.log(`[THEMES DEBUG] ${msg}`);
 }
 
 const version = process.env.ETHOS_VERSION;
-if (!shouldRun(version)) {
-    console.log(`[THEMES] Skipping — ETHOS_VERSION='${version}' is < 26`);
+const deployTarget = process.env.DEPLOY_TARGET;
+if (deployTarget !== 'simulator') {
+    console.log(`[THEMES] Skipping — target='${deployTarget}' is not 'simulator'`);
     process.exit(0);
+}
+if (version && !version.startsWith("nightly")) {
+    const major = parseInt(version.split('.')[0], 10);
+    if (isNaN(major) || major < 26) {
+        console.log(`[THEMES] Skipping — ETHOS_VERSION='${version}' is < 26`);
+        process.exit(0);
+    }
 }
 
 const destPath = process.env.DEST_PATH;

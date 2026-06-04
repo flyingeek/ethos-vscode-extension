@@ -117,4 +117,4 @@ An object step gives you full control over the script, arguments, and extra envi
 | Script | Description |
 | --- | --- |
 | [`./step-script-examples/deploy-sensors.mjs`](./step-script-examples/deploy-sensors.mjs) | Copies `.vscode/sensors.json` to the simulator root (skipped if already present, skipped on radio target). |
-| [`./step-script-examples/deploy-themes.mjs`](./step-script-examples/deploy-themes.mjs) | Mirrors `theme-*` directories from a sibling `EFC-themes` repo into the simulator's `scripts/` directory. Skipped when `ETHOS_VERSION` major < 26. The source directory can be overridden via `args[0]` or the `ETHOS_THEMES_DIR` env var. |
+| [`./step-script-examples/deploy-themes.mjs`](./step-script-examples/deploy-themes.mjs) | Mirrors `theme-*` directories from a sibling `EFC-themes` repo into the simulator's `scripts/` directory. Skipped when `ETHOS_VERSION` major < 26, skipped on radio target. The source directory can be overridden via `args[0]` or the `ETHOS_THEMES_DIR` env var. |

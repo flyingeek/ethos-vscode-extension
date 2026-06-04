@@ -18,13 +18,13 @@ import { constants } from 'fs';
 
 const deployTarget = process.env.DEPLOY_TARGET;
 if (deployTarget !== 'simulator') {
-    console.log(`deploy-sensors: skipping (target="${deployTarget}")`);
+    console.log(`[SENSORS] Skipping — target='${deployTarget}' is not 'simulator'`);
     process.exit(0);
 }
 
 const destPath = process.env.DEST_PATH;
 if (!destPath) {
-    console.error('deploy-sensors: DEST_PATH is not set.');
+    console.error('[SENSORS] — DEST_PATH is not set.');
     process.exit(1);
 }
 
@@ -37,7 +37,7 @@ const destSensors = join(dirname(dirname(destPath)), 'sensors.json');
 
 try {
     await access(destSensors, constants.F_OK);
-    console.log(`deploy-sensors: ${destSensors} already exists, skipping.`);
+    console.log(`[SENSORS] Skipping — ${destSensors} already exists`);
     process.exit(0);
 } catch {
     // File does not exist — proceed with copy
@@ -45,8 +45,8 @@ try {
 
 try {
     await copyFile(srcSensors, destSensors);
-    console.log(`deploy-sensors: copied ${srcSensors} -> ${destSensors}`);
+    console.log(`[SENSORS] Copied — ${srcSensors} -> ${destSensors}`);
 } catch (e) {
-    console.error(`deploy-sensors: failed to copy sensors.json: ${e.message}`);
+    console.error(`[SENSORS] Failed to copy sensors.json: ${e.message}`);
     process.exit(1);
 }
