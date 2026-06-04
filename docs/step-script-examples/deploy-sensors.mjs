@@ -13,7 +13,7 @@
 */
 
 import { copyFile, access } from 'fs/promises';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { constants } from 'fs';
 
 const deployTarget = process.env.DEPLOY_TARGET;
@@ -28,9 +28,12 @@ if (!destPath) {
     process.exit(1);
 }
 
-// .vscode/sensors.json lives at the workspace root
 const workspaceRoot = process.env.WORKSPACE_ROOT || process.cwd();
-const srcSensors = join(workspaceRoot, '.vscode', 'sensors.json');
+// .vscode/sensors.json lives at the workspace root by default
+let srcSensors = join(workspaceRoot, '.vscode', 'sensors.json');
+if (process.argv[2]) {
+    srcSensors = resolve(process.argv[2]);
+}
 
 // Target: two levels above the app folder — <simulatorsFolder>/<board>_<protocol>@<release>/sensors.json
 const destSensors = join(dirname(dirname(destPath)), 'sensors.json');
