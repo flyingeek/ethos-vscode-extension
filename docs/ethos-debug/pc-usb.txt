@@ -1,0 +1,34 @@
+
+=== Platform ===
+{
+  "system": "win32",
+  "release": "10.0.26100",
+  "arch": "x64",
+  "node": "v24.15.0"
+}
+
+=== Volumes ===
+No candidate mounted radio volumes found.
+
+=== HID Devices ===
+{
+  "vendorId": 1155,
+  "productId": 22352,
+  "path": "\\\\?\\HID#VID_0483&PID_5750&MI_00#8&2b0b2702&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}",
+  "productString": "FrSky TWXLITES Interface",
+  "manufacturerString": "FrSky",
+  "serialNumber": "㔳ㄶ㤳㘷㐳〳",
+  "interfaceNumber": 0,
+  "usagePage": 255,
+  "usage": 1
+}
+
+=== RadioInterface Probe ===
+Using VID=0x0483 PID=0x5750 retries=10 retryDelay=1000ms
+HID open: OK
+{
+  "board": 12,
+  "defaultStorage": "radio"
+}
+
+=== Done ===

@@ -22,7 +22,7 @@ import {
     RadioInterface,
     getRadioConfig,
 } from '../radio/hid';
-import { scanDrives, unmountDrives } from '../radio/volumes';
+import { scanDrives, unmountDrives, type DriveMap } from '../radio/volumes';
 import { tailSerialToChannel } from '../radio/serial';
 
 const execFileAsync = promisify(execFile);
@@ -68,31 +68,42 @@ interface VolumeInfo {
 }
 
 function listVolumes(): VolumeInfo[] {
-    const bases = ['/Volumes', '/media', '/mnt'];
     const result: VolumeInfo[] = [];
 
-    for (const base of bases) {
-        if (!fs.existsSync(base)) { continue; }
-        let entries: string[];
-        try { entries = fs.readdirSync(base).sort(); } catch { continue; }
+    const checkVolume = (root: string): void => {
+        try {
+            if (!fs.statSync(root).isDirectory()) { return; }
+        } catch { return; }
 
-        for (const entry of entries) {
-            const root = path.join(base, entry);
-            try {
-                if (!fs.statSync(root).isDirectory()) { continue; }
-            } catch { continue; }
-
-            const markers: string[] = [];
-            for (const key of ['flash', 'sdcard', 'radio']) {
-                if (fs.existsSync(path.join(root, `${key}.cpuid`))) {
-                    markers.push(key);
-                }
+        const markers: string[] = [];
+        for (const key of ['flash', 'sdcard', 'radio']) {
+            if (fs.existsSync(path.join(root, `${key}.cpuid`))) {
+                markers.push(key);
             }
-            const scripts = fs.existsSync(path.join(root, 'scripts')) &&
-                            fs.statSync(path.join(root, 'scripts')).isDirectory();
+        }
+        let scripts = false;
+        try {
+            scripts = fs.existsSync(path.join(root, 'scripts')) &&
+                      fs.statSync(path.join(root, 'scripts')).isDirectory();
+        } catch { /* ignore */ }
 
-            if (markers.length > 0 || scripts) {
-                result.push({ root, markers, scripts });
+        if (markers.length > 0 || scripts) {
+            result.push({ root, markers, scripts });
+        }
+    };
+
+    if (process.platform === 'win32') {
+        for (let c = 'A'.charCodeAt(0); c <= 'Z'.charCodeAt(0); c++) {
+            checkVolume(`${String.fromCharCode(c)}:\\`);
+        }
+    } else {
+        const bases = ['/Volumes', '/media', '/mnt'];
+        for (const base of bases) {
+            if (!fs.existsSync(base)) { continue; }
+            let entries: string[];
+            try { entries = fs.readdirSync(base).sort(); } catch { continue; }
+            for (const entry of entries) {
+                checkVolume(path.join(base, entry));
             }
         }
     }
@@ -258,7 +269,24 @@ export async function switchToUsb(channel: vscode.OutputChannel): Promise<void> 
             radio.close();
         }
         channel.appendLine('[radio] Radio switched to USB storage mode.');
-    } catch (e) {
+        // Wait for the radio to re-enumerate as USB mass storage and mount its volumes.
+        channel.appendLine('[radio] Waiting for radio volumes to mount\u2026');
+        const maxAttempts = 20;
+        const intervalMs = 1000;
+        let drives: DriveMap = {};
+        for (let i = 0; i < maxAttempts; i++) {
+            await new Promise<void>(r => setTimeout(r, intervalMs));
+            drives = await scanDrives();
+            if (Object.keys(drives).length > 0) { break; }
+        }
+        if (Object.keys(drives).length > 0) {
+            channel.appendLine('[radio] Mounted volumes:');
+            for (const [key, vol] of Object.entries(drives)) {
+                channel.appendLine(`  ${key}: ${vol}`);
+            }
+        } else {
+            channel.appendLine('[radio] No radio volumes detected after waiting.');
+        }    } catch (e) {
         channel.appendLine(`[radio] Error switching to USB: ${e}`);
         vscode.window.showErrorMessage(`Ethos: could not switch to USB storage mode — ${e}`);
     }
