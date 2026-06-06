@@ -23,10 +23,10 @@ This command relies on [`node-hid`](https://github.com/node-hid/node-hid), a nat
 **Developers (local F5 testing only):** after `npm install`, run once:
 
 ```bash
-npx electron-rebuild -w node-hid
+npm run rebuild-hid
 ```
 
-Run this from the workspace root in a VS Code integrated terminal. `electron-rebuild` detects the VS Code Electron version automatically from the running process. Redo it whenever VS Code updates its Electron version (a few times a year).
+Run this from the workspace root in a VS Code integrated terminal. It fetches the current VS Code Electron version automatically and rebuilds `node-hid` against it. Redo it whenever VS Code updates its Electron version (a few times a year).
 
 If the binary is missing or was compiled against the wrong ABI, the command shows a clear error message in the output channel instead of crashing the extension.
 

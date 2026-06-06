@@ -200,7 +200,8 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "refresh-lock": "npm install --package-lock-only --ignore-scripts"
+    "refresh-lock": "npm install --package-lock-only --ignore-scripts",
+    "rebuild-hid": "node scripts/rebuild-hid.mjs"
   },
   "dependencies": {
     "node-hid": "^3.3.0"
