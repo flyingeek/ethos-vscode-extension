@@ -74,7 +74,7 @@ You might notice there are some duplicates, for example, Altitude is present in 
 
 both GPS Altitude and VariADV Altitude will be set. This is intentional, as this tool is for debug purpose. If this is a problem for you, use several sensors.json.
 
-## CSV injection of telemetry data in ethos-sim-manager
+## CSV injection of telemetry data in ethos-vscode-extension
 
 When the extension begins to play a csv file, first it requests the list of available frame names (those defined in sensors.json), then it parses the log file. Frame names are defined on the first row of the CSV, the extension then reads lines either in real time or with a speed multiplier. The extension sends to the `bsongis.extension` only the frame names defined both in the csv file and in the sensors.json. This reduces the bandwidth needed.
 
@@ -106,3 +106,15 @@ Date,Time,Altitude(m),RxBatt(V),GPS
 CSV units are ignored, so you can have "Altitude(m)" or "Altitude(ft)", it will be the same. The only important thing is that the frame name (without unit) is defined in sensors.json.
 
 This extension will try to convert known names, for example "GPS Altitude(m)" will be converted to "Altitude", but this is not guaranteed to work in all cases, so it's better to have a clean CSV file with frame names matching those in sensors.json.
+
+## Custom sensor frames
+
+You can set a name in the sensors.json for your custom sensors. Even if the name is not displayed in the Telemetry webview, you can use it in your CSV file and it will be accepted by the simulator.
+
+If name is not set, you can not use it CSV playback, but you can still use the ethosExt.setTelemetry command or the ethos.injectTelemetry command.
+
+```js
+ethos.injectTelemetry([{"name": "My custom frame", "value": 42}, {"appId": 0x400, value: 42}]);
+```
+
+Note that when you create your DIY sensor in the radio, it must use a physId of 0x98 in the simulator.
