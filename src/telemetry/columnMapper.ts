@@ -9,6 +9,7 @@
 
 export interface FrameEntry {
   name: string;
+  appId?: number;
   parse: (value: string) => number | null;
 }
 
@@ -153,9 +154,13 @@ function parseSecondToken(v: string): number | null {
  */
 export function buildColumnPlan(
   headers: string[],
-  availableFrames: string[],
+  sensors: Array<{ name: string; appId?: number }>,
 ): ColumnEntry[] {
-  const frameSet = new Set(availableFrames);
+  const frameNames = sensors.map(s => s.name).filter(n => n !== '');
+  const frameSet = new Set(frameNames);
+  const appIdMap = new Map<string, number>(
+    sensors.filter(s => s.name !== '' && s.appId !== undefined).map(s => [s.name, s.appId!])
+  );
   const format = detectFormat(headers);
   const plan: ColumnEntry[] = [];
 
@@ -170,11 +175,11 @@ export function buildColumnPlan(
     if (stripped === 'GPS') {
       const frames: FrameEntry[] = [];
       if (frameSet.has('Latitude') && !mappedFrames.has('Latitude')) {
-        frames.push({ name: 'Latitude', parse: parseFirstToken });
+        frames.push({ name: 'Latitude', appId: appIdMap.get('Latitude'), parse: parseFirstToken });
         mappedFrames.add('Latitude');
       }
       if (frameSet.has('Longitude') && !mappedFrames.has('Longitude')) {
-        frames.push({ name: 'Longitude', parse: parseSecondToken });
+        frames.push({ name: 'Longitude', appId: appIdMap.get('Longitude'), parse: parseSecondToken });
         mappedFrames.add('Longitude');
       }
       if (frames.length > 0) {
@@ -188,7 +193,7 @@ export function buildColumnPlan(
     if (mappedFrames.has(frameName)) { continue; } // dedup (e.g. two 1RSS cols)
 
     mappedFrames.add(frameName);
-    plan.push({ colIndex: i, frames: [{ name: frameName, parse: parseFloat_ }] });
+    plan.push({ colIndex: i, frames: [{ name: frameName, appId: appIdMap.get(frameName), parse: parseFloat_ }] });
   }
 
   return plan;

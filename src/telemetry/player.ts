@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { parseCsv } from './csvParser';
 import { buildColumnPlan, ColumnEntry } from './columnMapper';
+import { normalizeSensors } from '../utils/ethosApi';
 
 const MAX_ROW_DELAY_MS = 5000;
 const FALLBACK_DELAY_MS = 100;
@@ -109,17 +110,17 @@ async function playPass(
 
   if (columnPlan === null) {
     // First pass: query available frames and build the plan
-    let availableFrames: string[];
+    let sensors: ReturnType<typeof normalizeSensors>;
     try {
-      const result = await vscode.commands.executeCommand<string[]>('ethos.getSensors');
-      availableFrames = Array.isArray(result) ? result : [];
+      const result = await vscode.commands.executeCommand<unknown>('ethos.getSensors');
+      sensors = normalizeSensors(result);
     } catch {
       throw new Error('Could not reach the Ethos simulator. Make sure it is running (ethos.start).');
     }
-    if (availableFrames.length === 0) {
+    if (sensors.length === 0) {
       throw new Error('No telemetry frames available. Check sensors.json in your simulator root.');
     }
-    columnPlan = buildColumnPlan(headers, availableFrames);
+    columnPlan = buildColumnPlan(headers, sensors);
     if (columnPlan.length === 0) {
       throw new Error('No CSV columns matched any available telemetry frame. Check your sensors.json and CSV header.');
     }
@@ -153,13 +154,15 @@ async function playPass(
     if (token.isCancellationRequested) { break; }
 
     // Build injection payload
-    const payload: Array<{ name: string; value: number }> = [];
+    const payload: Array<{ name: string; appId?: number; value: number }> = [];
     for (const entry of columnPlan) {
       const raw = row[entry.colIndex] ?? '';
       for (const frame of entry.frames) {
         const value = frame.parse(raw);
         if (value !== null) {
-          payload.push({ name: frame.name, value });
+          const item: { name: string; appId?: number; value: number } = { name: frame.name, value };
+          if (frame.appId !== undefined) { item.appId = frame.appId; }
+          payload.push(item);
         }
       }
     }

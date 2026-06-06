@@ -18,3 +18,13 @@ export async function getEthosApi(): Promise<EthosApi | undefined> {
     return undefined;
   }
 }
+
+export type SensorInfo = { name: string; appId?: number };
+
+export function normalizeSensors(raw: unknown): SensorInfo[] {
+  if (!Array.isArray(raw) || raw.length === 0) { return []; }
+  if (typeof raw[0] === 'string') {
+    return (raw as string[]).map(name => ({ name }));
+  }
+  return (raw as { name: string; appId: number }[]).map(s => ({ name: s.name, appId: s.appId }));
+}
