@@ -111,7 +111,7 @@ This extension will try to convert known names, for example "GPS Altitude(m)" wi
 
 You can set a name in the sensors.json for your custom sensors. Even if the name is not displayed in the Telemetry webview, you can use it in your CSV file and it will be accepted by the simulator.
 
-If name is not set, you can not use it CSV playback, but you can still use the ethosExt.setTelemetry command or the ethos.injectTelemetry command.
+If name is not set, you can not use it in CSV playback, but you can still use the ethosExt.setTelemetry command or the ethos.injectTelemetry command.
 
 ```js
 ethos.injectTelemetry([{"name": "My custom frame", "value": 42}, {"appId": 0x400, value: 42}]);
