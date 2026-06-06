@@ -2,7 +2,7 @@
   "name": "ethos-vscode-extension",
   "displayName": "Ethos VSCode Extension",
   "description": "Telemetry replay for the Ethos Simulator",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
