@@ -20,6 +20,8 @@ The extension is only activated in workspaces where the [bsongis.ethos](https://
 
 Download the latest VSIX for your platform from the [Releases](https://github.com/flyingeek/ethos-vscode-extension/releases) page and install it via the Extensions panel in VS Code (drag and drop the VSIX file in the panel).
 
+We also ship an universal VSIX, more limited but that should work on all platforms. The platform-specific ones are recommended as they include native dependencies for the radio connection features. In other words, all radio connection features (deploy, serial console, debug) require the platform-specific VSIX.
+
 ## Configuration
 
 | Setting | Type | Description |
