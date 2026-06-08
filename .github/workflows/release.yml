@@ -201,9 +201,13 @@ jobs:
           npm prune --omit=dev --ignore-scripts
           npm pkg set scripts.vscode:prepublish="echo already compiled"
 
-      # Remove the native addon entirely so the VSIX has no binary
+      # Remove the native addon entirely so the VSIX has no binary.
+      # Use npm uninstall (not rm -rf) so node-hid is removed from both
+      # node_modules and package.json, and its now-orphaned sub-dependencies
+      # are pruned — otherwise vsce's `npm list --production` reports the
+      # package as missing and the sub-deps as extraneous.
       - name: Remove node-hid
-        run: rm -rf node_modules/node-hid
+        run: npm uninstall node-hid --ignore-scripts
 
       - name: Package universal extension
         run: npx --yes @vscode/vsce package
