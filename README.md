@@ -26,6 +26,8 @@ Download the latest VSIX for your platform from the [Releases](https://github.co
 |---|---|---|
 | `ethosExt.telemetryCustomSpeed` | `number` | Optional custom replay speed multiplier for telemetry playback. If set, it will appear as an option in the speed picker during playback. |
 | `ethosExt.deploy` | `object` | Configuration for **Ethos: Deploy to Simulator** and **Ethos: Deploy to Radio** (see below). |
+| `ethosExt.reload` | `object` | Configuration for **Ethos: Reload Simulator**. Same syntax as ethos-menu.json, defaults to { "command": ["ethos.stop", "ethosExt.deploySimulator", "ethos.start"] }. The ethosExt.reload is available from the simulator's Display titlebar |
+| `ethosExt.radio` | `object` | Configuration for radio connection and deploy target detection (see [radio settings](./docs/radio-settings.md)). |
 
 For Deploy to work, the minimum settings to add is:
 
@@ -88,6 +90,15 @@ RADIO:/scripts/<appname>
 - `path.basename(ethosExt.deploy.app)` otherwise
 
 RADIO: is the first available storage key (`sdcard` or `radio`) containing a scripts folder on the connected radio.
+
+The radio is synced using different methosds:
+
+- Lua mode `ethosExt.deployRadioLua`: only .lua files are copied, useful for quick iterations when project is quite big.
+- Fast mode `ethosExt.deployRadioFast`: uses `rsync` like mode, the manifest is skipped.
+- Manifest mode `ethosExt.deployRadio`: is like fast mode but the manifest is used to determine which files to copy and delete.
+- Ultra Safe Mode `ethosExt.deployRadio`: extra steps ensure a safe deployment, this is the default mode when no manifest present.
+
+All thoses modes were ported from rob thomson's deploy scripts.
 
 ### Deploy Configuration
 

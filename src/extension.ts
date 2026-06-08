@@ -3,6 +3,7 @@ import { playTelemetryCommand, stopTelemetry } from './commands/playTelemetry';
 import { setTelemetryCommand } from './commands/setTelemetry';
 import { deployCommand } from './commands/deploy';
 import { radioDebugCommand, radioSerialConsoleCommand } from './commands/radioDebug';
+import { reloadCommand } from './commands/reload';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -15,6 +16,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('ethosExt.deployRadioFast', () => deployCommand('radio-fast')),
     vscode.commands.registerCommand('ethosExt.radioDebug',      () => radioDebugCommand()),
     vscode.commands.registerCommand('ethosExt.radioSerial',     () => radioSerialConsoleCommand()),
+    vscode.commands.registerCommand('ethosExt.reload',           () => reloadCommand()),
   );
 }
 

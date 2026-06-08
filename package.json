@@ -68,6 +68,36 @@
               "default": 115200,
               "minimum": 1200,
               "description": "Baud rate for the radio serial debug console."
+            },
+            "storageTargetPriority": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["flash", "sdcard", "radio"]
+              },
+              "default": ["sdcard", "radio"],
+              "description": "Ethos storage types to probe as deploy targets, in priority order (first match is used). Identified by *.cpuid marker + scripts/ subdirectory."
+            }
+          }
+        },
+        "ethosExt.reload": {
+          "type": "object",
+          "scope": "resource",
+          "description": "Action to perform when the Reload command is triggered. Use 'command' for a sequence of VS Code commands, or 'task' for a task name.",
+          "default": {
+            "command": ["ethos.stop", "ethosExt.deploySimulator", "ethos.start"]
+          },
+          "properties": {
+            "command": {
+              "oneOf": [
+                { "type": "string" },
+                { "type": "array", "items": { "type": "string" } }
+              ],
+              "description": "A VS Code command ID or an ordered array of command IDs to execute in sequence."
+            },
+            "task": {
+              "type": "string",
+              "description": "A VS Code task name to run (mutually exclusive with 'command')."
             }
           }
         },
@@ -193,8 +223,22 @@
      {
         "command": "ethosExt.radioSerial",
         "title": "Ethos: Radio Serial Console"
+      },
+      {
+        "command": "ethosExt.reload",
+        "title": "Ethos: Reload Simulator",
+        "icon": "$(debug-restart)"
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ethosExt.reload",
+          "when": "activeWebviewPanelId == 'display'",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
