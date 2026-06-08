@@ -14,7 +14,7 @@
  * subdirectory.
  */
 
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
@@ -28,7 +28,8 @@ const CPUID_KEYS: ReadonlyArray<'flash' | 'sdcard' | 'radio'> = ['flash', 'sdcar
 /** Check a single volume path for Ethos cpuid markers + scripts/ subdir. */
 async function probeVolume(volPath: string): Promise<DriveMap> {
     const result: DriveMap = {};
-    for (const key of CPUID_KEYS) {
+    const keys = vscode.workspace.getConfiguration('ethosExt').get<string[]>('radio.storageTargetPriority') ?? ['sdcard', 'radio'];
+    for (const key of keys as Array<'flash' | 'sdcard' | 'radio'>) {
         try {
             await fs.access(path.join(volPath, `${key}.cpuid`));
             await fs.access(path.join(volPath, 'scripts'));
