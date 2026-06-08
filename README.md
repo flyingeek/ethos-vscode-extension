@@ -25,8 +25,8 @@ We also ship an universal VSIX, more limited but that should work on all platfor
 ## Configuration
 
 | Setting | Type | Description |
-|---|---|---|
-| `ethosExt.telemetryCustomSpeed` | `number` | Optional custom replay speed multiplier for telemetry playback. If set, it will appear as an option in the speed picker during playback. |
+| --- | --- | --- |
+| `ethosExt.telemetryReplaySpeeds` | `number[]` | Replay speed multipliers shown during telemetry playback. Defaults to `[1, 2, 5, 10]`. |
 | `ethosExt.deploy` | `object` | Configuration for **Ethos: Deploy to Simulator** and **Ethos: Deploy to Radio** (see below). |
 | `ethosExt.reload` | `object` | Configuration for **Ethos: Reload Simulator**. Same syntax as ethos-menu.json, defaults to { "command": ["ethos.stop", "ethosExt.deploySimulator", "ethos.start"] }. The ethosExt.reload is available from the simulator's Display titlebar |
 | `ethosExt.radio` | `object` | Configuration for radio connection and deploy target detection (see [radio settings](./docs/radio-settings.md)). |
@@ -46,7 +46,7 @@ For Deploy to work, the minimum settings to add is:
 Telemetry frame discovery uses `sensors.json` from the simulator root.
 
 1. Pick a CSV file from the workspace (or browse the file system).
-2. Select a replay speed (`1×`, `2×`, `5×`, `10×`, or a custom value if configured via `ethosExt.telemetryCustomSpeed`).
+2. Select a replay speed. The default options are `1×`, `2×`, `5×`, and `10×`, configurable via `ethosExt.telemetryReplaySpeeds`.
 3. Choose **Play once** or **Loop**.
 
 Supported formats:

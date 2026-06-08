@@ -12,6 +12,8 @@ const TELEMETRY_PIN = {
   tooltip: 'Ethos: Stop telemetry playback',
 } as const;
 
+const DEFAULT_TELEMETRY_REPLAY_SPEEDS = [1, 2, 5, 10];
+
 async function pinTelemetryStatus(playing: boolean): Promise<void> {
   try {
     await vscode.commands.executeCommand('ethos.pinStatusBar', playing ? TELEMETRY_PIN : undefined);
@@ -135,17 +137,14 @@ export async function playTelemetryCommand(context: vscode.ExtensionContext): Pr
   // ── 2. Speed picker ───────────────────────────────────────────────────────
   interface SpeedItem extends vscode.QuickPickItem { multiplier: number; }
   const config = vscode.workspace.getConfiguration();
-  const customSpeed = config.get<number>('ethosExt.telemetryCustomSpeed');
+  const configuredSpeeds = config.get<number[]>('ethosExt.telemetryReplaySpeeds') ?? DEFAULT_TELEMETRY_REPLAY_SPEEDS;
   const savedSpeed = context.workspaceState.get<number>('telemetrySpeed') ?? 1;
 
-  const baseMultipliers = [1, 2, 5, 10];
-  const speedItems: SpeedItem[] = [];
-
-  // Prepend custom speed if defined and not already a preset
-  if (customSpeed !== undefined && !baseMultipliers.includes(customSpeed)) {
-    speedItems.push({ label: `${customSpeed}×`, multiplier: customSpeed });
-  }
-  speedItems.push(...baseMultipliers.map(m => ({ label: `${m}×`, multiplier: m })));
+  const replaySpeeds = configuredSpeeds.filter((speed, index, speeds) =>
+    Number.isFinite(speed) && speed > 0 && speeds.indexOf(speed) === index,
+  );
+  const speedItems: SpeedItem[] = (replaySpeeds.length > 0 ? replaySpeeds : DEFAULT_TELEMETRY_REPLAY_SPEEDS)
+    .map(multiplier => ({ label: `${multiplier}×`, multiplier }));
 
   const activeSpeedItem = speedItems.find(i => i.multiplier === savedSpeed) ?? speedItems[0];
 

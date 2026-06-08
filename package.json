@@ -25,10 +25,16 @@
     "configuration": {
       "title": "Ethos VSCode Extension",
       "properties": {
-        "ethosExt.telemetryCustomSpeed": {
-          "type": "number",
-          "minimum": 0.1,
-          "description": "Custom replay speed multiplier for telemetry playback.",
+        "ethosExt.telemetryReplaySpeeds": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0.1
+          },
+          "default": [1, 2, 5, 10],
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Replay speed multipliers shown during telemetry playback.",
           "scope": "resource"
         },
         "ethosExt.radio": {
