@@ -234,6 +234,12 @@
         "command": "ethosExt.reload",
         "title": "Ethos: Reload Simulator",
         "icon": "$(debug-restart)"
+      },
+      {
+        "command": "ethosExt.openManifestDoc",
+        "title": "Open Manifest Documentation",
+        "category": "Ethos",
+        "icon": "$(question)"
       }
     ],
     "menus": {
@@ -242,6 +248,11 @@
           "command": "ethosExt.reload",
           "when": "activeWebviewPanelId == 'display'",
           "group": "navigation"
+        },
+        {
+            "command": "ethosExt.openManifestDoc",
+            "when": "resourceFilename == 'ethos_lua_manifest.json'",
+            "group": "navigation"
         }
       ]
     }

@@ -4,6 +4,7 @@ import { setTelemetryCommand } from './commands/setTelemetry';
 import { deployCommand } from './commands/deploy';
 import { radioDebugCommand, radioSerialConsoleCommand } from './commands/radioDebug';
 import { reloadCommand } from './commands/reload';
+import { openManifestDoc } from './commands/openManifestDoc'
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
@@ -17,6 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('ethosExt.radioDebug',      () => radioDebugCommand()),
     vscode.commands.registerCommand('ethosExt.radioSerial',     () => radioSerialConsoleCommand()),
     vscode.commands.registerCommand('ethosExt.reload',           () => reloadCommand()),
+    vscode.commands.registerCommand('ethosExt.openManifestDoc', () => openManifestDoc()),
   );
 }
 
