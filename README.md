@@ -100,7 +100,7 @@ The radio is synced using different methosds:
 - Manifest mode `ethosExt.deployRadio`: is like fast mode but the manifest is used to determine which files to copy and delete.
 - Ultra Safe Mode `ethosExt.deployRadio`: extra steps ensure a safe deployment, this is the default mode when no manifest present.
 
-All thoses modes were ported from rob thomson's deploy scripts.
+All thoses modes (except manifest mode)were ported from rob thomson's deploy scripts.
 
 ### Deploy Configuration
 
