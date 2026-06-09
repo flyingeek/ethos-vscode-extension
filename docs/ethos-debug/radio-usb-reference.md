@@ -37,8 +37,8 @@ This matches `defaultStorage: "radio"` from `requestInformation()` and the `get_
 - `/dev/cu.usbmodem144202`
 - `/dev/tty.usbmodem144202`
 
-VID/PID match `ethosExt.radio.vendorId` (`"0483"`) and `ethosExt.radio.productId` (`"5750"`) VS Code settings.
-Baud rate: `115200` — configurable via `ethosExt.radio.serialBaud`.
+VID/PID match `ethos-devtools.radio.vendorId` (`"0483"`) and `ethos-devtools.radio.productId` (`"5750"`) VS Code settings.
+Baud rate: `115200` — configurable via `ethos-devtools.radio.serialBaud`.
 
 ## USB Mode switching (HID protocol)
 

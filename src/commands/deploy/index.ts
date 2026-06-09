@@ -170,13 +170,13 @@ async function cleanupStaging(stageRoot: string | undefined, channel: vscode.Out
 }
 
 export async function deployCommand(target: string = 'simulator'): Promise<void> {
-    // --- Read ethosExt.deploy config ---
-    const extConfig = vscode.workspace.getConfiguration('ethosExt');
+    // --- Read ethos-devtools.deploy config ---
+    const extConfig = vscode.workspace.getConfiguration('ethos-devtools');
     const deployConfig = extConfig.get<DeployConfig>('deploy') ?? {};
 
     const appRelative = deployConfig.app;
     if (!appRelative) {
-        vscode.window.showErrorMessage('Ethos Deploy: ethosExt.deploy.app is not set.');
+        vscode.window.showErrorMessage('Ethos Deploy: ethos-devtools.deploy.app is not set.');
         return;
     }
 
@@ -254,7 +254,7 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
     if (useManifest) { channel.appendLine(`  manifest: ${path.relative(workspaceRoot, manifestPath)}`); }
 
     await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: 'Ethos: Deploying…', cancellable: false },
+        { location: vscode.ProgressLocation.Notification, title: 'Ethos DevTools: Deploying…', cancellable: false },
         async () => {
             let finalizeOnError: (() => Promise<void>) | undefined;
 
@@ -317,6 +317,6 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
     );
 
     if (didDeploy && result) {
-        vscode.window.showInformationMessage(`Ethos: Deployed to ${path.relative(result.destBase, result.destAppPath)}`);
+        vscode.window.showInformationMessage(`Ethos DevTools: Deployed to ${path.relative(result.destBase, result.destAppPath)}`);
     }
 }

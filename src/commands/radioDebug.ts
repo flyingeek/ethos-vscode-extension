@@ -1,5 +1,5 @@
 /**
- * ethosExt.radioDebug command.
+ * ethos-devtools.radioDebug command.
  *
  * Quick pick with three actions:
  *   - Show Debug Connection  → diagnostic snapshot (Ethos Debug Connection channel)
@@ -246,7 +246,7 @@ export async function switchToSerial(channel: vscode.OutputChannel): Promise<voi
         channel.appendLine('[radio] Radio switched to serial mode.');
     } catch (e) {
         channel.appendLine(`[radio] Error switching to serial: ${e}`);
-        vscode.window.showErrorMessage(`Ethos: could not switch to serial mode — ${e}`);
+        vscode.window.showErrorMessage(`Ethos DevTools: could not switch to serial mode — ${e}`);
         return;
     }
 
@@ -288,7 +288,7 @@ export async function switchToUsb(channel: vscode.OutputChannel): Promise<void> 
             channel.appendLine('[radio] No radio volumes detected after waiting.');
         }    } catch (e) {
         channel.appendLine(`[radio] Error switching to USB: ${e}`);
-        vscode.window.showErrorMessage(`Ethos: could not switch to USB storage mode — ${e}`);
+        vscode.window.showErrorMessage(`Ethos DevTools: could not switch to USB storage mode — ${e}`);
     }
 }
 
@@ -317,7 +317,7 @@ export async function radioDebugCommand(): Promise<void> {
     ];
 
     const picked = await vscode.window.showQuickPick(items, {
-        placeHolder: 'Ethos: Radio Debug — choose an action',
+        placeHolder: 'Ethos DevTools: Radio Debug — choose an action',
     });
     if (!picked) { return; }
 

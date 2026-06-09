@@ -2,7 +2,7 @@
  * Post-deploy step: copy .vscode/sensors.json to the simulator's scripts folder
  * (one level above DEST_PATH), but only if sensors.json does not already exist there.
  *
- * Usage in ethosExt.deploy.steps:
+ * Usage in ethos-devtools.deploy.steps:
  *   "docs/deploy-sensors.mjs"
  *
  * Environment variables provided by the deploy command:

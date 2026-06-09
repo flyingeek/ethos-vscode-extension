@@ -20,7 +20,7 @@ The command also reads the following settings from the `bsongis.ethos` extension
 
 ## Manifest mode
 
-Manifest mode is an attempt to match the behavior of Ethos Suite 1.7.2's "Lua App Manifest" feature, it has some limitations due to the differences in the deployment process. Manifest mode activates when `ethosExt.deploy.manifest` is set to a non-empty string.
+Manifest mode is an attempt to match the behavior of Ethos Suite 1.7.2's "Lua App Manifest" feature, it has some limitations due to the differences in the deployment process. Manifest mode activates when `ethos-devtools.deploy.manifest` is set to a non-empty string.
 
 It uses an [`ethos_lua_manifest.json`](./ethos_lua_manifest.json) file:
 

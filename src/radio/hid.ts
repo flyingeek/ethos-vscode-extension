@@ -51,10 +51,10 @@ const DEFAULT_RADIO_CONFIG: RadioConfig = {
     serialBaud:  115200,
 };
 
-/** Read ethosExt.radio settings and merge with defaults. */
+/** Read ethos-devtools.radio settings and merge with defaults. */
 export function getRadioConfig(): RadioConfig {
     const cfg = require('vscode').workspace
-        .getConfiguration('ethosExt.radio') as {
+        .getConfiguration('ethos-devtools.radio') as {
             get<T>(key: string): T | undefined;
         };
     const parseHex = (v: string | undefined, fallback: number): number => {

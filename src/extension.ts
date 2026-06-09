@@ -10,17 +10,17 @@ export function activate(context: vscode.ExtensionContext): void {
   registerManifestDocProvider(context)
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('ethosExt.playTelemetry', () => playTelemetryCommand(context)),
-    vscode.commands.registerCommand('ethosExt.stopTelemetry', () => stopTelemetry()),
-    vscode.commands.registerCommand('ethosExt.setTelemetry', () => setTelemetryCommand()),
-    vscode.commands.registerCommand('ethosExt.deploySimulator', () => deployCommand('simulator')),
-    vscode.commands.registerCommand('ethosExt.deployRadio',     () => deployCommand('radio')),
-    vscode.commands.registerCommand('ethosExt.deployRadioLua',  () => deployCommand('radio-lua')),
-    vscode.commands.registerCommand('ethosExt.deployRadioFast', () => deployCommand('radio-fast')),
-    vscode.commands.registerCommand('ethosExt.radioDebug',      () => radioDebugCommand()),
-    vscode.commands.registerCommand('ethosExt.radioSerial',     () => radioSerialConsoleCommand()),
-    vscode.commands.registerCommand('ethosExt.reload',           () => reloadCommand()),
-    vscode.commands.registerCommand('ethosExt.openManifestDoc', () => openManifestDoc()),
+    vscode.commands.registerCommand('ethos-devtools.playTelemetry', () => playTelemetryCommand(context)),
+    vscode.commands.registerCommand('ethos-devtools.stopTelemetry', () => stopTelemetry()),
+    vscode.commands.registerCommand('ethos-devtools.setTelemetry', () => setTelemetryCommand()),
+    vscode.commands.registerCommand('ethos-devtools.deploySimulator', () => deployCommand('simulator')),
+    vscode.commands.registerCommand('ethos-devtools.deployRadio',     () => deployCommand('radio')),
+    vscode.commands.registerCommand('ethos-devtools.deployRadioLua',  () => deployCommand('radio-lua')),
+    vscode.commands.registerCommand('ethos-devtools.deployRadioFast', () => deployCommand('radio-fast')),
+    vscode.commands.registerCommand('ethos-devtools.radioDebug',      () => radioDebugCommand()),
+    vscode.commands.registerCommand('ethos-devtools.radioSerial',     () => radioSerialConsoleCommand()),
+    vscode.commands.registerCommand('ethos-devtools.reload',           () => reloadCommand()),
+    vscode.commands.registerCommand('ethos-devtools.openManifestDoc', () => openManifestDoc()),
   );
 }
 

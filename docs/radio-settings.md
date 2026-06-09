@@ -1,9 +1,9 @@
-# ethosExt.radio Settings
+# ethos-devtools.radio Settings
 
-Configuration for the radio USB/HID connection, deploy target detection, and serial console. All properties are nested under `ethosExt.radio` in your `settings.json`.
+Configuration for the radio USB/HID connection, deploy target detection, and serial console. All properties are nested under `ethos-devtools.radio` in your `settings.json`.
 
 ```json
-"ethosExt.radio": {
+"ethos-devtools.radio": {
     "vendorId": "0483",
     "productId": "5750",
     "retries": 10,
@@ -50,7 +50,7 @@ Manufacturer name hint used for fuzzy serial port matching when VID/PID lookup i
 - **Type:** `number` (minimum: 1200)
 - **Default:** `115200`
 
-Baud rate for the **Ethos: Radio Serial Console** command.
+Baud rate for the **Ethos DevTools: Radio Serial Console** command.
 
 ### `storageTargetPriority`
 - **Type:** `string[]` — each item one of `"flash"`, `"sdcard"`, `"radio"`
@@ -62,7 +62,7 @@ The first type in the list whose volume is found becomes the deploy destination.
 
 **Example — prioritize radio over sdcard:**
 ```json
-"ethosExt.radio": {
+"ethos-devtools.radio": {
     "storageTargetPriority": ["radio", "sdcard"]
 }
 ```

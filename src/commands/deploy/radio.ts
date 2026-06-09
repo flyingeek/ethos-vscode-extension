@@ -118,7 +118,7 @@ export async function radioTarget(
     } else {
         try {
             drives = await vscode.window.withProgress(
-                { location: vscode.ProgressLocation.Notification, title: 'Ethos: Waiting for radio volume…', cancellable: false },
+                { location: vscode.ProgressLocation.Notification, title: 'Ethos DevTools: Waiting for radio volume…', cancellable: false },
                 () => waitForVolumes(30_000, 1_000)
             );
         } catch (e) {

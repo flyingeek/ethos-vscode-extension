@@ -2,7 +2,7 @@
  * Post-deploy step: mirror theme-* directories from a sibling EFC-themes repo
  * into the simulator's scripts directory (one level above DEST_PATH).
  *
- * Usage in ethosExt.deploy.steps:
+ * Usage in ethos-devtools.deploy.steps:
  *   "docs/deploy-themes.mjs"
  *
  * Environment variables provided by the deploy command:
@@ -101,6 +101,12 @@ const failedThemes = [];
 for (const themeName of themeDirs) {
     const src = join(srcThemesDir, themeName);
     const dst = join(dstThemesDir, themeName);
+    const dstStat = await stat(dst).catch(() => null);
+    if (dstStat && dstStat.isDirectory()) {
+        debug(`Skipping ${themeName} (already exists)`);
+        //copiedCount++;
+        continue;
+    }
     debug(`Copying ${themeName}...`);
     try {
         await cp(src, dst, { recursive: true });

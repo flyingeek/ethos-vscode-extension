@@ -264,14 +264,14 @@ export async function radioSafeFullCopy(
 }
 
 // ---------------------------------------------------------------------------
-// radioMirrorCopy  (wired to ethosExt.deployRadioFast)
+// radioMirrorCopy  (wired to ethos-devtools.deployRadioFast)
 // ---------------------------------------------------------------------------
 
 /**
  * Incremental mirror copy with MD5-based change detection.
  * Mirrors mirror_copy() in deploy.py with DEPLOY_TO_RADIO=True.
  *
- * Used by the 'radio-fast' target (ethosExt.deployRadioFast command).
+ * Used by the 'radio-fast' target (ethos-devtools.deployRadioFast command).
  */
 export async function radioMirrorCopy(
     srcDir: string,

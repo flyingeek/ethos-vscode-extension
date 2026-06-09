@@ -14,7 +14,7 @@ export async function getEthosApi(): Promise<EthosApi | undefined> {
   try {
     return await extension.activate();
   } catch (err) {
-    console.error('Ethos: failed to activate API:', err);
+    console.error('Ethos DevTools: failed to activate API:', err);
     return undefined;
   }
 }

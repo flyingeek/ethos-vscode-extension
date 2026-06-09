@@ -262,4 +262,4 @@ jobs:
           gh release create "$TAG" \
             --title "v${VERSION}" \
             --generate-notes \
-            ethos-vscode-extension-*.vsix
+            ethos-devtools-*.vsix

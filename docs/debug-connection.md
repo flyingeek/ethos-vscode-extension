@@ -1,4 +1,4 @@
-# Ethos: Radio Debug (`ethosExt.radioDebug`)
+# Ethos DevTools: Radio Debug (`ethos-devtools.radioDebug`)
 
 It shows a Quick Pick with the following options:
 

@@ -6,7 +6,7 @@ interface ReloadAction {
 }
 
 export async function reloadCommand(): Promise<void> {
-    const action = vscode.workspace.getConfiguration('ethosExt').get<ReloadAction>('reload') ?? {};
+    const action = vscode.workspace.getConfiguration('ethos-devtools').get<ReloadAction>('reload') ?? {};
 
     if (action.command) {
         const commands = Array.isArray(action.command) ? action.command : [action.command];
@@ -14,12 +14,12 @@ export async function reloadCommand(): Promise<void> {
             try {
                 await vscode.commands.executeCommand(cmd);
             } catch (err) {
-                console.error(`Ethos: command '${cmd}' failed:`, err);
+                console.error(`Ethos DevTools: command '${cmd}' failed:`, err);
             }
         }
     } else if (action.task) {
         vscode.commands
             .executeCommand('workbench.action.tasks.runTask', action.task)
-            .then(undefined, (err) => console.error(`Ethos: task '${action.task}' failed:`, err));
+            .then(undefined, (err) => console.error(`Ethos DevTools: task '${action.task}' failed:`, err));
     }
 }

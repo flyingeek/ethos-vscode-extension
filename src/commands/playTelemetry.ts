@@ -8,8 +8,8 @@ let runningStateSubscription: vscode.Disposable | undefined;
 
 const TELEMETRY_PIN = {
   text: '$(loading~spin) Telemetry playing',
-  command: 'ethosExt.stopTelemetry',
-  tooltip: 'Ethos: Stop telemetry playback',
+  command: 'ethos-devtools.stopTelemetry',
+  tooltip: 'Ethos DevTools: Stop telemetry playback',
 } as const;
 
 const DEFAULT_TELEMETRY_REPLAY_SPEEDS = [1, 2, 5, 10];
@@ -18,7 +18,7 @@ async function pinTelemetryStatus(playing: boolean): Promise<void> {
   try {
     await vscode.commands.executeCommand('ethos.pinStatusBar', playing ? TELEMETRY_PIN : undefined);
   } catch (err) {
-    console.error('Ethos: pinStatusBar failed:', err);
+    console.error('Ethos DevTools: pinStatusBar failed:', err);
   }
 }
 
@@ -137,7 +137,7 @@ export async function playTelemetryCommand(context: vscode.ExtensionContext): Pr
   // ── 2. Speed picker ───────────────────────────────────────────────────────
   interface SpeedItem extends vscode.QuickPickItem { multiplier: number; }
   const config = vscode.workspace.getConfiguration();
-  const configuredSpeeds = config.get<number[]>('ethosExt.telemetryReplaySpeeds') ?? DEFAULT_TELEMETRY_REPLAY_SPEEDS;
+  const configuredSpeeds = config.get<number[]>('ethos-devtools.telemetryReplaySpeeds') ?? DEFAULT_TELEMETRY_REPLAY_SPEEDS;
   const savedSpeed = context.workspaceState.get<number>('telemetrySpeed') ?? 1;
 
   const replaySpeeds = configuredSpeeds.filter((speed, index, speeds) =>

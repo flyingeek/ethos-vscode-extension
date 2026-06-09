@@ -1,12 +1,12 @@
 {
-  "name": "ethos-vscode-extension",
-  "displayName": "Ethos VSCode Extension",
-  "description": "Telemetry replay for the Ethos Simulator",
+  "name": "ethos-devtools",
+  "displayName": "Ethos DevTools",
+  "description": "Telemetry and deploy tools for the Ethos Simulator",
   "version": "0.7.3",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
-    "url": "https://github.com/flyingeek/ethos-vscode-extension"
+    "url": "https://github.com/flyingeek/vscode-ethos-devtools"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -23,9 +23,9 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Ethos VSCode Extension",
+      "title": "Ethos DevTools",
       "properties": {
-        "ethosExt.telemetryReplaySpeeds": {
+        "ethos-devtools.telemetryReplaySpeeds": {
           "type": "array",
           "items": {
             "type": "number",
@@ -37,7 +37,7 @@
           "description": "Replay speed multipliers shown during telemetry playback.",
           "scope": "resource"
         },
-        "ethosExt.radio": {
+        "ethos-devtools.radio": {
           "type": "object",
           "scope": "resource",
           "description": "Configuration for radio USB/HID connection.",
@@ -86,12 +86,12 @@
             }
           }
         },
-        "ethosExt.reload": {
+        "ethos-devtools.reload": {
           "type": "object",
           "scope": "resource",
           "description": "Action to perform when the Reload command is triggered. Use 'command' for a sequence of VS Code commands, or 'task' for a task name.",
           "default": {
-            "command": ["ethos.stop", "ethosExt.deploySimulator", "ethos.start"]
+            "command": ["ethos.stop", "ethos-devtools.deploySimulator", "ethos.start"]
           },
           "properties": {
             "command": {
@@ -107,7 +107,7 @@
             }
           }
         },
-        "ethosExt.deploy": {
+        "ethos-devtools.deploy": {
           "type": "object",
           "scope": "resource",
           "description": "Configuration for the Deploy to simulator and Deploy to radio commands.",
@@ -195,48 +195,48 @@
     },
     "commands": [
       {
-        "command": "ethosExt.playTelemetry",
-        "title": "Ethos: Play Telemetry CSV"
+        "command": "ethos-devtools.playTelemetry",
+        "title": "Ethos DevTools: Play Telemetry CSV"
       },
       {
-        "command": "ethosExt.stopTelemetry",
-        "title": "Ethos: Stop Telemetry"
+        "command": "ethos-devtools.stopTelemetry",
+        "title": "Ethos DevTools: Stop Telemetry"
       },
       {
-        "command": "ethosExt.setTelemetry",
-        "title": "Ethos: Set Telemetry Value"
+        "command": "ethos-devtools.setTelemetry",
+        "title": "Ethos DevTools: Set Telemetry Value"
       },
       {
-        "command": "ethosExt.deploySimulator",
-        "title": "Ethos: Deploy to Simulator"
+        "command": "ethos-devtools.deploySimulator",
+        "title": "Ethos DevTools: Deploy to Simulator"
       },
       {
-        "command": "ethosExt.deployRadio",
-        "title": "Ethos: Deploy to Radio"
+        "command": "ethos-devtools.deployRadio",
+        "title": "Ethos DevTools: Deploy to Radio"
       },
       {
-        "command": "ethosExt.deployRadioLua",
-        "title": "Ethos: Deploy to Radio (Lua only)"
+        "command": "ethos-devtools.deployRadioLua",
+        "title": "Ethos DevTools: Deploy to Radio (Lua only)"
       },
       {
-        "command": "ethosExt.deployRadioFast",
-        "title": "Ethos: Deploy to Radio (fast)"
+        "command": "ethos-devtools.deployRadioFast",
+        "title": "Ethos DevTools: Deploy to Radio (fast)"
       },
       {
-        "command": "ethosExt.radioDebug",
-        "title": "Ethos: Radio Debug"
+        "command": "ethos-devtools.radioDebug",
+        "title": "Ethos DevTools: Radio Debug"
       },
      {
-        "command": "ethosExt.radioSerial",
-        "title": "Ethos: Radio Serial Console"
+        "command": "ethos-devtools.radioSerial",
+        "title": "Ethos DevTools: Radio Serial Console"
       },
       {
-        "command": "ethosExt.reload",
-        "title": "Ethos: Reload Simulator",
+        "command": "ethos-devtools.reload",
+        "title": "Ethos DevTools: Reload Simulator",
         "icon": "$(debug-restart)"
       },
       {
-        "command": "ethosExt.openManifestDoc",
+        "command": "ethos-devtools.openManifestDoc",
         "title": "Open Manifest Documentation",
         "category": "Ethos",
         "icon": "$(question)"
@@ -245,14 +245,21 @@
     "menus": {
       "editor/title": [
         {
-          "command": "ethosExt.reload",
+          "command": "ethos-devtools.reload",
           "when": "activeWebviewPanelId == 'display'",
           "group": "navigation"
         },
         {
-            "command": "ethosExt.openManifestDoc",
+            "command": "ethos-devtools.openManifestDoc",
             "when": "resourceFilename == 'ethos_lua_manifest.json'",
             "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "ethos-devtools.openManifestDoc",
+          "when": "false",
+          "group": "ethos"
         }
       ]
     }
