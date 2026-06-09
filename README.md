@@ -24,9 +24,14 @@ The extension is only activated in workspaces where the [bsongis.ethos](https://
 
 ## Installation
 
-Download the latest VSIX for your platform from the [Releases](https://github.com/flyingeek/ethos-vscode-extension/releases) page and install it via the Extensions panel in VS Code (drag and drop the VSIX file in the panel).
+Install the extension from the VS Code marketplace: [flyingeek.ethos-devtools](https://marketplace.visualstudio.com/items?itemName=flyingeek.ethos-devtools)
 
-We also ship an universal VSIX, more limited but that should work on all platforms. The platform-specific ones are recommended as they include native dependencies for the radio connection features. In other words, all radio connection features (deploy, serial console, debug) require the platform-specific VSIX.
+The extension use native dependencies for the radio connection features, so we provide platform-specific VSIX files for Windows (x64), Linux (x64), and MacOS (arm64 and x64).
+The Linux version has not been tested yet, feel free to raise an issue if you want to help testing it or if you encounter any problem.
+
+For other platforms, there is an "universal" version without native dependencies, but the radio connection features will not work, you still can use the telemetry and deploy to simulator features.
+
+VSIX files can also be downloaded from the releases page. To install a VSIX file, open the Extensions view in VS Code, click on the three-dot menu in the top-right corner, and select "Install from VSIX...". Then, select the downloaded VSIX file (or simply drag and drop it into the Extensions view).
 
 ## Configuration
 
