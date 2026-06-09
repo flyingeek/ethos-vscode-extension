@@ -2,7 +2,7 @@
   "name": "ethos-devtools",
   "displayName": "Ethos DevTools",
   "description": "Telemetry and deploy tools for the Ethos Simulator",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "publisher": "flyingeek",
   "repository": {
     "type": "git",
