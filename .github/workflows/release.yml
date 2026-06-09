@@ -179,6 +179,8 @@ jobs:
             node_modules/node-hid/prebuilds \
             node_modules/node-hid/src
           rm -f node_modules/node-hid/binding.gyp
+          # Linux builds can leave duplicate native addons under obj.target.
+          rm -rf node_modules/node-hid/build/Release/obj.target
           find node_modules/node-hid/build -type f ! -name '*.node' -delete
           find node_modules/node-hid/build -type d -empty -delete
 
