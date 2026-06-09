@@ -1,3 +1,5 @@
+<img width="1280" height="640" alt="ETHOS_DevTools" src="https://github.com/user-attachments/assets/a408464b-40f7-400b-baa7-33f1028adc08" />
+
 # Ethos DevTools Extension
 
 Ethos DevTools `flyingeek.ethos-devtools` is a VS Code extension that complements the [bsongis.ethos](https://marketplace.visualstudio.com/items?itemName=bsongis.ethos) extension.
