@@ -169,6 +169,19 @@ jobs:
           npm prune --omit=dev --ignore-scripts
           npm pkg set scripts.vscode:prepublish="echo already compiled"
 
+      - name: Trim node-hid package contents
+        if: steps.selection.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          rm -rf \
+            node_modules/node-hid/bin \
+            node_modules/node-hid/hidapi \
+            node_modules/node-hid/prebuilds \
+            node_modules/node-hid/src
+          rm -f node_modules/node-hid/binding.gyp
+          find node_modules/node-hid/build -type f ! -name '*.node' -delete
+          find node_modules/node-hid/build -type d -empty -delete
+
       - name: Package extension
         if: steps.selection.outputs.should_run == 'true'
         run: npx --yes @vscode/vsce package --target ${{ matrix.target }}

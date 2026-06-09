@@ -11,6 +11,13 @@ tsconfig.json
 # Bundle node-hid (native addon) and its transitive runtime deps;
 # exclude everything else in node_modules.
 node_modules/**
-!node_modules/node-hid/**
-!node_modules/node-addon-api/**
+!node_modules/node-hid/
+!node_modules/node-hid/package.json
+!node_modules/node-hid/nodehid.js
+!node_modules/node-hid/nodehid.d.ts
+!node_modules/node-hid/binding-options.js
+!node_modules/node-hid/LICENSE-bsd.txt
+!node_modules/node-hid/build/
+!node_modules/node-hid/build/Release/
+!node_modules/node-hid/build/Release/*.node
 !node_modules/pkg-prebuilds/**
