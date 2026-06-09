@@ -11,9 +11,12 @@
   "engines": {
     "vscode": "^1.85.0"
   },
+  "icon": "icon.png",
+  "keywords": ["ethos", "frsky", "simulator", "deploy"],
   "categories": [
     "Other"
   ],
+  "license": "MIT",
   "activationEvents": [
     "onStartupFinished"
   ],
