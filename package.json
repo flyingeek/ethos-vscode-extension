@@ -12,7 +12,12 @@
     "vscode": "^1.85.0"
   },
   "icon": "icon.png",
-  "keywords": ["ethos", "frsky", "simulator", "deploy"],
+  "keywords": [
+    "ethos",
+    "frsky",
+    "simulator",
+    "deploy"
+  ],
   "categories": [
     "Other"
   ],
@@ -34,7 +39,12 @@
             "type": "number",
             "minimum": 0.1
           },
-          "default": [1, 2, 5, 10],
+          "default": [
+            1,
+            2,
+            5,
+            10
+          ],
           "minItems": 1,
           "uniqueItems": true,
           "description": "Replay speed multipliers shown during telemetry playback.",
@@ -63,7 +73,7 @@
             },
             "retryDelay": {
               "type": "number",
-              "default": 1.0,
+              "default": 1,
               "minimum": 0.1,
               "description": "Delay in seconds between HID open retries."
             },
@@ -82,9 +92,16 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["flash", "sdcard", "radio"]
+                "enum": [
+                  "flash",
+                  "sdcard",
+                  "radio"
+                ]
               },
-              "default": ["sdcard", "radio"],
+              "default": [
+                "sdcard",
+                "radio"
+              ],
               "description": "Ethos storage types to probe as deploy targets, in priority order (first match is used). Identified by *.cpuid marker + scripts/ subdirectory."
             }
           }
@@ -94,13 +111,24 @@
           "scope": "resource",
           "description": "Action to perform when the Reload command is triggered. Use 'command' for a sequence of VS Code commands, or 'task' for a task name.",
           "default": {
-            "command": ["ethos.stop", "ethos-devtools.deploySimulator", "ethos.start"]
+            "command": [
+              "ethos.stop",
+              "ethos-devtools.deploySimulator",
+              "ethos.start"
+            ]
           },
           "properties": {
             "command": {
               "oneOf": [
-                { "type": "string" },
-                { "type": "array", "items": { "type": "string" } }
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
               ],
               "description": "A VS Code command ID or an ordered array of command IDs to execute in sequence."
             },
@@ -134,7 +162,9 @@
                   },
                   {
                     "type": "object",
-                    "required": ["script"],
+                    "required": [
+                      "script"
+                    ],
                     "properties": {
                       "script": {
                         "type": "string",
@@ -142,12 +172,16 @@
                       },
                       "args": {
                         "type": "array",
-                        "items": { "type": "string" },
+                        "items": {
+                          "type": "string"
+                        },
                         "description": "Additional arguments passed to fork() for .mjs scripts, or appended to the command for exec."
                       },
                       "env": {
                         "type": "object",
-                        "additionalProperties": { "type": "string" },
+                        "additionalProperties": {
+                          "type": "string"
+                        },
                         "description": "Extra environment variables merged into the step's environment."
                       }
                     },
@@ -168,7 +202,9 @@
                   },
                   {
                     "type": "object",
-                    "required": ["script"],
+                    "required": [
+                      "script"
+                    ],
                     "properties": {
                       "script": {
                         "type": "string",
@@ -176,12 +212,16 @@
                       },
                       "args": {
                         "type": "array",
-                        "items": { "type": "string" },
+                        "items": {
+                          "type": "string"
+                        },
                         "description": "Additional arguments passed to fork() for .mjs scripts, or appended to the command for exec."
                       },
                       "env": {
                         "type": "object",
-                        "additionalProperties": { "type": "string" },
+                        "additionalProperties": {
+                          "type": "string"
+                        },
                         "description": "Extra environment variables merged into the step's environment."
                       }
                     },
@@ -229,7 +269,7 @@
         "command": "ethos-devtools.radioDebug",
         "title": "Ethos DevTools: Radio Debug"
       },
-     {
+      {
         "command": "ethos-devtools.radioSerial",
         "title": "Ethos DevTools: Radio Serial Console"
       },
@@ -253,9 +293,9 @@
           "group": "navigation"
         },
         {
-            "command": "ethos-devtools.openManifestDoc",
-            "when": "resourceFilename == 'ethos_lua_manifest.json'",
-            "group": "navigation"
+          "command": "ethos-devtools.openManifestDoc",
+          "when": "resourceFilename == 'ethos_lua_manifest.json'",
+          "group": "navigation"
         }
       ],
       "commandPalette": [
@@ -274,7 +314,8 @@
     "refresh-lock": "npm install --package-lock-only --ignore-scripts",
     "check-versions": "node .vscode/scripts/check-versions.mjs",
     "release": "node .vscode/scripts/release-tag-and-push.mjs",
-    "rebuild-hid": "node .vscode/scripts/rebuild-hid.mjs"
+    "rebuild-hid": "node .vscode/scripts/rebuild-hid.mjs",
+    "prepare": "husky || true"
   },
   "dependencies": {
     "node-hid": "^3.3.0"
@@ -287,6 +328,7 @@
     "@types/node": "18.x",
     "@types/node-hid": "^1.3.4",
     "@types/vscode": "^1.85.0",
+    "husky": "^9.1.7",
     "node-gyp": "^10.2.0",
     "typescript": "^5.3.0"
   }
