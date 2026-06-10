@@ -1,0 +1,7 @@
+[
+    {
+      "name": "Basic Lua Widget",
+      "description": "Minimal Ethos widget template",
+      "repo": "flyingeek/vscode-ethos-devtools-scaffold"
+    }
+]
