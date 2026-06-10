@@ -272,7 +272,9 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "refresh-lock": "npm install --package-lock-only --ignore-scripts",
-    "rebuild-hid": "node scripts/rebuild-hid.mjs"
+    "check-versions": "node .vscode/scripts/check-versions.mjs",
+    "release": "node .vscode/scripts/release-tag-and-push.mjs",
+    "rebuild-hid": "node .vscode/scripts/rebuild-hid.mjs"
   },
   "dependencies": {
     "node-hid": "^3.3.0"

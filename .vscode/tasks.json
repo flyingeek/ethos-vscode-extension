@@ -29,12 +29,8 @@
     },
     {
       "label": "release: tag and push",
-      "type": "process",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "./.vscode/release-tag-and-push.sh \"${input:releaseTag}\""
-      ],
+      "type": "shell",
+      "command": "npm run release -- ${input:releaseTag}",
       "problemMatcher": [],
       "group": "build"
     }

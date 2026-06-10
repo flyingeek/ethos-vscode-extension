@@ -2,7 +2,7 @@ node_modules/
 out/
 *.vsix
 .vscode-test/
-.vscode/scripts
+.vscode/scripts-rob
 /ethos_lua_manifest.*
 ethos debug.txt
 .vscode/radio-usb-reference.md
