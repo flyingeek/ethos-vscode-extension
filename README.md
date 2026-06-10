@@ -11,6 +11,7 @@ It adds those commands to VS Code:
 - **Ethos DevTools: Deploy to Radio** — deploy a Lua app folder to a connected radio. The radio can be connected in `Ethos Suite` or `Serial` mode.
 - **Ethos DevTools: Radio Serial Console** - Tail the radio's serial console output into the **Ethos Deploy** output channel. The radio must be connected in `Serial` mode for this to work.
 - **Ethos DevTools: Radio Debug** — useful tools for debugging a connected radio (see [Debug Connection](./docs/debug-connection.md)).
+- **Ethos DevTools: Scaffold New Project** — scaffold a new Lua project from a GitHub template repository, with interactive prompts and template variable substitution.
 
 The extension is only activated in workspaces where the [bsongis.ethos](https://marketplace.visualstudio.com/items?itemName=bsongis.ethos) extension is active. It requires `bsongis.ethos` to be installed.
 

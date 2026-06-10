@@ -5,6 +5,7 @@ import { deployCommand } from './commands/deploy';
 import { radioDebugCommand, radioSerialConsoleCommand } from './commands/radioDebug';
 import { reloadCommand } from './commands/reload';
 import { openManifestDoc, registerManifestDocProvider } from './commands/openManifestDoc'
+import { scaffoldCommand } from './commands/scaffold'
 
 export function activate(context: vscode.ExtensionContext): void {
   registerManifestDocProvider(context)
@@ -21,6 +22,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('ethos-devtools.radioSerial',     () => radioSerialConsoleCommand()),
     vscode.commands.registerCommand('ethos-devtools.reload',           () => reloadCommand()),
     vscode.commands.registerCommand('ethos-devtools.openManifestDoc', () => openManifestDoc()),
+    vscode.commands.registerCommand('ethos-devtools.scaffoldProject', () => scaffoldCommand(context.extensionUri)),
   );
 }
 

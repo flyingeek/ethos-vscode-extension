@@ -283,6 +283,10 @@
         "title": "Open Manifest Documentation",
         "category": "Ethos",
         "icon": "$(question)"
+      },
+      {
+        "command": "ethos-devtools.scaffoldProject",
+        "title": "Ethos DevTools: Scaffold New Project"
       }
     ],
     "menus": {
