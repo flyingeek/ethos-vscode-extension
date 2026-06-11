@@ -7,7 +7,7 @@ The extension provides a command to scaffold new projects from GitHub template r
 ## Usage
 
 1. Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac).
-2. Search for and select the command `Ethos: Scaffold New Project`.
+2. Search for and select the command `Ethos DevTools: Scaffold New Project`.
 3. Follow the prompts to choose a destination folder, select a template, and answer any questions related to the template.
 4. The extension will generate the project files based on your selections and inputs.
 
