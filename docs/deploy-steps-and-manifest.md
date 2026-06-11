@@ -6,16 +6,20 @@ Ethos DevTools supports the following projects:
 
 1) Single app at first level
 
-    workspace/
-    └── app/
-        └── main.lua
+    ```plaintext
+        workspace/
+        └── app/
+            └── main.lua
+    ```
 
 2) App nested under other directories
 
-    workspace/
-    └── src/
-        └── app/
-            └── main.lua
+    ```plaintext
+        workspace/
+        └── src/
+            └── app/
+                └── main.lua
+    ```
 
 For repo containing multiple apps, some limitations apply, see [Multiple widgets repo](#multiple-widgets-repo).
 
@@ -27,6 +31,7 @@ For repo containing multiple apps, some limitations apply, see [Multiple widgets
 | `manifest` | `string` | `""` | Workspace-relative path to the Ethos Lua manifest file. If set to a non-empty string, only files listed in the manifest are copied (manifest mode). If empty, all files are copied recursively. |
 | `stageSteps` | `(string \| object)[]` | `[]` | Pre-copy deploy steps. When present, the source app is first copied to a temporary staging folder, these steps run against the staged app, and then the staged output is deployed. See [Deploy steps](#deploy-steps). |
 | `steps` | `(string \| object)[]` | `[]` | Post-copy deploy steps that run sequentially after files are copied to the final target folder. See [Deploy steps](#deploy-steps). |
+| `multiApp` | `boolean` | `false` | When true, 'app' is treated as a container directory. Each immediate subdirectory containing a top-level main.lua is deployed independently to the simulator. Incompatible with manifest, stageSteps, steps, and radio targets. |
 
 The command also reads the following settings from the `bsongis.ethos` extension:
 
@@ -140,38 +145,44 @@ An object step gives you full control over the script, arguments, and extra envi
 
 ## Multiple widgets repo
 
-workspace/
-├── app1/
-│   └── main.lua
-├── app2/
-│   └── main.lua
-└── app3/
-    └── main.lua
+1) Workspace with multiple app folders at root level
 
-In a workspace with multiple app folders at root level, define `ethos-devtools.deploy.app` as `.`:
-
-```json
-"ethos-devtools.deploy": {
-    "app": ".",
-    "multiApp": true
-}
-```
-
-workspace/
-└── scripts/
+    ```plaintext
+    workspace/
     ├── app1/
     │   └── main.lua
     ├── app2/
     │   └── main.lua
     └── app3/
         └── main.lua
+    ```
 
-```json
-"ethos-devtools.deploy": {
-    "app": "scripts",
-    "multiApp": true
-}
-```
+    ```json
+    "ethos-devtools.deploy": {
+        "app": ".",
+        "multiApp": true
+    }
+    ```
+
+2) Workspace with multiple app folders under a common parent directory
+
+    ```plaintext
+    workspace/
+    └── scripts/
+        ├── app1/
+        │   └── main.lua
+        ├── app2/
+        │   └── main.lua
+        └── app3/
+            └── main.lua
+    ```
+
+    ```json
+    "ethos-devtools.deploy": {
+        "app": "scripts",
+        "multiApp": true
+    }
+    ```
 
 With the multiApp setting, the deploy command is limited:
 
