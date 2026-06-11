@@ -14,7 +14,7 @@ const filters: Record<string, (s: string) => string> = {
     basename: s => s.split(/[/\\]/).pop() ?? s,
 };
 
-const TOKEN_RE = /\$\{\{([\w.]+)(?:\s*\|\s*(\w+))?\}\}/g;
+const TOKEN_RE = /\$\{\{([\w.]+)(?:\s*\|\s*([^}]+))?\}\}/g;
 
 const CONFIG_PREFIX = 'config.';
 
@@ -31,10 +31,19 @@ export function processTemplate(content: string, answers: ScaffoldAnswers, confi
             value = answers[id];
         }
         if (value === undefined) { return _match; }
-        const str = String(value);
+        let str = String(value);
         if (filter) {
-            const fn = filters[filter.toLowerCase()];
-            return fn ? fn(str) : str;
+            const names = filter
+                .split('|')
+                .map(name => name.trim())
+                .filter(Boolean);
+
+            for (const name of names) {
+                const fn = filters[name.toLowerCase()];
+                if (fn) {
+                    str = fn(str);
+                }
+            }
         }
         return str;
     });

@@ -5,12 +5,13 @@
     "outDir": "out",
     "lib": ["ES2022"],
     "sourceMap": true,
-    "rootDir": "src",
+    "rootDir": ".",
     "strict": true,
     "skipLibCheck": true,
     "moduleResolution": "node16",
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", ".vscode-test"]
 }
