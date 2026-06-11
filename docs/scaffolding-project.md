@@ -39,4 +39,4 @@ You can put those variables anywhere in the file content, or in the file name. F
 
 You can also access configuration values using `${{config.extension.someConfigKey}}`. This allows you to use values from the extension's configuration in your templates. Finally you pass pass an optional filter to the variable, like `${{appPath | upper}}` to transform the value before inserting it. The available filters are `uppercase`, `lowercase`, `kebabcase`, and `basename`.
 
-Refer to the [basic widget template](https://github.com/flyingeek/vscode-ethos-devtools-scaffold) for a complete example of a template repository.
+Refer to the [basic widget template](https://github.com/flyingeek/ethos-devtools-scaffold-basic) for a complete example of a template repository.
