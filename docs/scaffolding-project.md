@@ -23,13 +23,19 @@ To add a new template, simply raise an issue on the project's GitHub repository.
 ```json
 {
     "name": "Ethos Lua Widget",
-    "description": "Basic widget template",
+    "description": "Basic widget template with RSSI telemetry set",
     "version": 1,
     "prompts": [
-      { "id": "appPath", "type": "input", "message": "App folder ? (e.g., myapp or src/myapp)", "default": "myapp", "validate": "^[a-zA-Z]\\w*(/\\w+)?$" }
+      {
+        "id": "appPath",
+        "type": "input",
+        "message": "App folder ? (e.g., myapp or src/myapp)",
+        "default": "myapp",
+        "validate": "^[\\w-]*(/[\\w-]+)?$"
+      }
     ],
     "templateFilePatterns": ["**/*.lua", "**/*.json", "**/*.md","**/*.mjs"],
-    "excludePatterns": [".scaffold.json", ".git/**", ".gitignore"]
+    "excludePatterns": [".scaffold.json", ".git/**", "**/.gitignore", "**/.gitkeep"]
 }
 ```
 
