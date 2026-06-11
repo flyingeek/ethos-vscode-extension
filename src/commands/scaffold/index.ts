@@ -112,8 +112,16 @@ async function processAndCopy(
     let count = 0;
 
     for (const relPath of allFiles) {
-        // Skip excluded files
-        if (matchesAny(relPath, excludePatterns)) { continue; }
+        // Skip excluded files, but still create directories for .gitkeep
+        if (matchesAny(relPath, excludePatterns)) {
+            if (relPath.endsWith('.gitkeep')) {
+                // Process the path through template engine to handle variables
+                const processedRelPath = relPath.split('/').map(seg => processFileName(seg, answers, configResolver)).join('/');
+                const destFile = path.join(destDir, processedRelPath);
+                await fs.mkdir(path.dirname(destFile), { recursive: true });
+            }
+            continue;
+        }
 
         // Skip conditional files whose condition is falsy
         let skip = false;
