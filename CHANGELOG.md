@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.9.1] - 2026-06-11
+
+- Had to change icon (wrong size)
+
 ## [0.9.0] - 2026-06-11
 
 - Add **Ethos DevTools: Scaffold New Project** command (see [Project Scaffolding](./docs/scaffolding-project.md))
