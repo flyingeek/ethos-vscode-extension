@@ -1,7 +1,7 @@
 [
     {
       "name": "Basic Lua Widget",
-      "description": "Minimal Ethos widget template",
-      "repo": "flyingeek/vscode-ethos-devtools-scaffold"
+      "description": "Basic widget template with RSSI telemetry set",
+      "repo": "flyingeek/ethos-devtools-scaffold-basic"
     }
 ]
