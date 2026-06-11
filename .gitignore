@@ -7,3 +7,4 @@ out/
 ethos debug.txt
 .vscode/radio-usb-reference.md
 ethos debug usb.txt
+.DS_Store
