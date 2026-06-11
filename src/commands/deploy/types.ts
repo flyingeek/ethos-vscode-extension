@@ -12,6 +12,7 @@ export interface DeployStep {
 
 export interface DeployConfig {
     app?: string;
+    multiApp?: boolean;
     manifest?: string;
     stageSteps?: (string | DeployStep)[];
     steps?: (string | DeployStep)[];

@@ -127,6 +127,8 @@ Configure the command via `ethos-devtools.deploy` in your workspace settings:
 
 The full configuration schema is described in the [Deploy steps and manifest doc](./docs/deploy-steps-and-manifest.md).
 
+Projects containing multiple apps are supported, but some limitations apply, see [Multiple widgets repo](./docs/deploy-steps-and-manifest.md#multiple-widgets-repo) in the same doc.
+
 ## ethos-menu.json
 
 To integrate with the Ethos extension's menu, add entries to your project's `ethos-menu.json` file:

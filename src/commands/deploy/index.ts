@@ -194,6 +194,34 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
 
     const sourcePath = path.join(workspaceRoot, appRelative);
 
+    // --- Guard: sourcePath must be inside the workspace ---
+    const resolvedSource = path.resolve(sourcePath);
+    const resolvedWorkspace = path.resolve(workspaceRoot);
+    if (resolvedSource !== resolvedWorkspace && !resolvedSource.startsWith(resolvedWorkspace + path.sep)) {
+        vscode.window.showErrorMessage('Ethos Deploy: app path must be inside the workspace folder.');
+        return;
+    }
+
+    const isWorkspaceRoot = resolvedSource === resolvedWorkspace;
+    const isMultiApp = isWorkspaceRoot || deployConfig.multiApp === true;
+
+    if (isMultiApp && shouldStage) {
+        vscode.window.showErrorMessage('Ethos Deploy: stageSteps cannot be used in multi-app mode.');
+        return;
+    }
+    if (isMultiApp && steps.length > 0) {
+        vscode.window.showErrorMessage('Ethos Deploy: steps cannot be used in multi-app mode.');
+        return;
+    }
+    if (isMultiApp && useManifest) {
+        vscode.window.showErrorMessage('Ethos Deploy: manifest cannot be used in multi-app mode.');
+        return;
+    }
+    if (isMultiApp && isRadioTarget(target)) {
+        vscode.window.showErrorMessage('Ethos Deploy: radio deploy is not supported in multi-app mode.');
+        return;
+    }
+
     // --- Resolve appname ---
     let appname: string;
     let projectManifest: EthosMeta | undefined;
@@ -246,6 +274,7 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
     let effectiveSourcePath = sourcePath;
     let stageRoot: string | undefined;
     let didDeploy = false;
+    let deployedCount = 0;
     let result: DeployTarget | undefined;
 
     channel.show(true);
@@ -259,47 +288,74 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
             let finalizeOnError: (() => Promise<void>) | undefined;
 
             try {
-                if (shouldStage) {
-                    channel.appendLine('[stage] Preparing staged source…');
-                    const staged = await stageSourceForDeploy(sourcePath, appname, channel);
-                    stageRoot = staged.stageRoot;
-                    effectiveSourcePath = staged.stagedSourcePath;
-                    channel.appendLine(`  stage   : ${effectiveSourcePath}`);
-
-                    const stageCode = await runSteps(stageSteps, workspaceRoot, sourcePath, effectiveSourcePath, target, channel);
-                    if (stageCode !== 0) {
-                        channel.appendLine(`  step failed with exit code ${stageCode}, aborting before copy.`);
-                        vscode.window.showErrorMessage(`Ethos Deploy: step failed (exit ${stageCode}). See "Ethos Deploy" output.`);
+                if (isMultiApp) {
+                    const entries = await fs.readdir(sourcePath, { withFileTypes: true });
+                    const appDirs: string[] = [];
+                    for (const entry of entries) {
+                        if (!entry.isDirectory()) { continue; }
+                        try {
+                            await fs.access(path.join(sourcePath, entry.name, 'main.lua'));
+                            appDirs.push(entry.name);
+                        } catch { /* no main.lua */ }
+                    }
+                    if (appDirs.length === 0) {
+                        vscode.window.showErrorMessage('Ethos Deploy: no subdirectory with a top-level main.lua found.');
                         return;
                     }
-                }
-
-                if (isRadioTarget(target)) {
-                    result = await radioTarget(effectiveSourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel, target);
+                    for (const subAppname of appDirs) {
+                        const subSourcePath = path.join(sourcePath, subAppname);
+                        channel.appendLine(`\n  [app] ${subAppname}`);
+                        const subResult = await simulatorTarget(subSourcePath, subAppname, undefined, deployConfig, workspaceRoot, channel);
+                        if (!subResult) { return; }
+                        channel.appendLine(`  dest    : ${path.relative(subResult.destBase, subResult.destAppPath)}`);
+                        await subResult.deploy();
+                        await subResult.finalize?.();
+                        deployedCount++;
+                    }
+                    didDeploy = true;
                 } else {
-                    result = await simulatorTarget(effectiveSourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel);
-                }
-                if (!result) {
-                    return;
-                }
+                    if (shouldStage) {
+                        channel.appendLine('[stage] Preparing staged source…');
+                        const staged = await stageSourceForDeploy(sourcePath, appname, channel);
+                        stageRoot = staged.stageRoot;
+                        effectiveSourcePath = staged.stagedSourcePath;
+                        channel.appendLine(`  stage   : ${effectiveSourcePath}`);
 
-                const { destAppPath, destBase, deploy, finalize } = result;
-                finalizeOnError = finalize;
+                        const stageCode = await runSteps(stageSteps, workspaceRoot, sourcePath, effectiveSourcePath, target, channel);
+                        if (stageCode !== 0) {
+                            channel.appendLine(`  step failed with exit code ${stageCode}, aborting before copy.`);
+                            vscode.window.showErrorMessage(`Ethos Deploy: step failed (exit ${stageCode}). See "Ethos Deploy" output.`);
+                            return;
+                        }
+                    }
 
-                channel.appendLine(`  dest    : ${path.relative(destBase, destAppPath)}`);
+                    if (isRadioTarget(target)) {
+                        result = await radioTarget(effectiveSourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel, target);
+                    } else {
+                        result = await simulatorTarget(effectiveSourcePath, appname, projectManifest, deployConfig, workspaceRoot, channel);
+                    }
+                    if (!result) {
+                        return;
+                    }
 
-                await deploy();
+                    const { destAppPath, destBase, deploy, finalize } = result;
+                    finalizeOnError = finalize;
 
-                const stepCode = await runSteps(steps, workspaceRoot, sourcePath, destAppPath, target, channel);
-                if (stepCode !== 0) {
-                    channel.appendLine(`  step failed with exit code ${stepCode}, aborting remaining steps.`);
-                    vscode.window.showErrorMessage(`Ethos Deploy: step failed (exit ${stepCode}). See "Ethos Deploy" output.`);
+                    channel.appendLine(`  dest    : ${path.relative(destBase, destAppPath)}`);
+
+                    await deploy();
+
+                    const stepCode = await runSteps(steps, workspaceRoot, sourcePath, destAppPath, target, channel);
+                    if (stepCode !== 0) {
+                        channel.appendLine(`  step failed with exit code ${stepCode}, aborting remaining steps.`);
+                        vscode.window.showErrorMessage(`Ethos Deploy: step failed (exit ${stepCode}). See "Ethos Deploy" output.`);
+                        await finalize?.();
+                        return;
+                    }
+
                     await finalize?.();
-                    return;
+                    didDeploy = true;
                 }
-
-                await finalize?.();
-                didDeploy = true;
             } catch (error) {
                 vscode.window.showErrorMessage(`Ethos Deploy: ${error}`);
 
@@ -316,7 +372,12 @@ export async function deployCommand(target: string = 'simulator'): Promise<void>
         }
     );
 
-    if (didDeploy && result) {
-        vscode.window.showInformationMessage(`Ethos DevTools: Deployed to ${path.relative(result.destBase, result.destAppPath)}`);
+    if (didDeploy) {
+        if (isMultiApp) {
+            const loc = isWorkspaceRoot ? '' : ` from ${appRelative}`;
+            vscode.window.showInformationMessage(`Ethos DevTools: Deployed ${deployedCount} app${deployedCount !== 1 ? 's' : ''}${loc} to simulator.`);
+        } else if (result) {
+            vscode.window.showInformationMessage(`Ethos DevTools: Deployed to ${path.relative(result.destBase, result.destAppPath)}`);
+        }
     }
 }

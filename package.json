@@ -147,6 +147,11 @@
               "type": "string",
               "description": "Workspace-relative path to the source app folder (e.g. src/gps-qrcode)."
             },
+            "multiApp": {
+              "type": "boolean",
+              "default": false,
+              "description": "When true, 'app' is treated as a container directory. Each immediate subdirectory containing a top-level main.lua is deployed independently to the simulator. Incompatible with manifest, stageSteps, steps, and radio targets."
+            },
             "manifest": {
               "type": "string",
               "default": "",

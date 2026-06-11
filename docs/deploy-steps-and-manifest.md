@@ -1,5 +1,24 @@
 # Deploy
 
+## Project structure
+
+Ethos DevTools supports the following projects:
+
+1) Single app at first level
+
+    workspace/
+    └── app/
+        └── main.lua
+
+2) App nested under other directories
+
+    workspace/
+    └── src/
+        └── app/
+            └── main.lua
+
+For repo containing multiple apps, some limitations apply, see [Multiple widgets repo](#multiple-widgets-repo).
+
 ## Configuration
 
 | Property | Type | Default | Description |
@@ -118,3 +137,45 @@ An object step gives you full control over the script, arguments, and extra envi
 | --- | --- |
 | [`./step-script-examples/deploy-sensors.mjs`](./step-script-examples/deploy-sensors.mjs) | Copies `.vscode/sensors.json` to the simulator root (skipped if already present, skipped on radio target). |
 | [`./step-script-examples/deploy-themes.mjs`](./step-script-examples/deploy-themes.mjs) | Mirrors `theme-*` directories from a sibling `EFC-themes` repo into the simulator's `scripts/` directory. Skipped when `ETHOS_VERSION` major < 26, skipped on radio target. The source directory can be overridden via `args[0]` or the `ETHOS_THEMES_DIR` env var. |
+
+## Multiple widgets repo
+
+workspace/
+├── app1/
+│   └── main.lua
+├── app2/
+│   └── main.lua
+└── app3/
+    └── main.lua
+
+In a workspace with multiple app folders at root level, define `ethos-devtools.deploy.app` as `.`:
+
+```json
+"ethos-devtools.deploy": {
+    "app": ".",
+    "multiApp": true
+}
+```
+
+workspace/
+└── scripts/
+    ├── app1/
+    │   └── main.lua
+    ├── app2/
+    │   └── main.lua
+    └── app3/
+        └── main.lua
+
+```json
+"ethos-devtools.deploy": {
+    "app": "scripts",
+    "multiApp": true
+}
+```
+
+With the multiApp setting, the deploy command is limited:
+
+- no manifest support (manifest mode requires a single app folder)
+- no staging steps (pre-deploy scripts)
+- no steps (post-deploy scripts)
+- deploy only to the simulator
